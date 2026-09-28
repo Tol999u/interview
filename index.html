@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESTsoft AI 면접심사관 에이전트</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --est-blue: #0055FF;
+            --est-dark: #111625;
+            --est-light: #F4F7FF;
+        }
+        body {
+            background-color: var(--est-light);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: #333;
+        }
+        .navbar {
+            background-color: var(--est-dark);
+            border-bottom: 3px solid var(--est-blue);
+        }
+        .navbar-brand {
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: #fff !important;
+        }
+        .navbar-brand span {
+            color: var(--est-blue);
+        }
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            margin-bottom: 24px;
+        }
+        .card-header {
+            background-color: #fff;
+            border-bottom: 1px solid #eef2f6;
+            padding: 16px 20px;
+            font-weight: 700;
+            border-radius: 12px 12px 0 0 !important;
+        }
+        .btn-est {
+            background-color: var(--est-blue);
+            color: #fff;
+            font-weight: 600;
+            padding: 10px 24px;
+            border-radius: 8px;
+            border: none;
+            transition: all 0.2s;
+        }
+        .btn-est:hover {
+            background-color: #0044cc;
+            color: #fff;
+        }
+        .badge-est {
+            background-color: rgba(0, 85, 255, 0.1);
+            color: var(--est-blue);
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 6px;
+        }
+        .question-box {
+            background-color: #fff;
+            border-left: 4px solid var(--est-blue);
+            padding: 16px;
+            margin-bottom: 12px;
+            border-radius: 0 8px 8px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        }
+        .question-box h6 {
+            color: var(--est-blue);
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        .checkpoint-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px dashed #e0e0e0;
+        }
+        .checkpoint-item:last-child {
+            border-bottom: none;
+        }
+        .spinner-border {
+            color: var(--est-blue);
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark mb-4">
+    <div class="container">
+        <a class="navbar-brand" href="#"><i class="bi bi-cpu-fill me-2"></i>EST<span>soft</span> AI Interviewer</a>
+        <span class="navbar-text text-white-50 fs-7">이스트소프트 채용검증 AI 에이전트 v1.0</span>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="row">
+        <!-- 좌측: 입력 폼 -->
+        <div class="col-lg-5">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-file-earmark-person me-2"></i>지원자 정보 입력</span>
+                    <span class="badge badge-est">AI 분석 준비</span>
+                </div>
+                <div class="card-body">
+                    <form id="interviewForm">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">지원 직군</label>
+                            <select class="form-select" id="jobPosition" required>
+                                <option value="AI / LLM 엔지니어">AI / LLM 연구/개발자</option>
+                                <option value="백엔드 / SW 개발자">백엔드 / SW 개발자</option>
+                                <option value="클라이언트 / 앱 개발자">클라이언트 / 앱 개발자</option>
+                                <option value="보안엔지니어 (알약)">보안 S/W 엔지니어</option>
+                                <option value="기획 / PM">AI 서비스 기획 / PM</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">이력서 및 포트폴리오 텍스트</label>
+                            <textarea class="form-select" id="resumeText" rows="12" placeholder="지원자의 이력서, 경력기술서, 프로젝트 설명, Github 링크 등을 자유롭게 입력하세요..." style="height: auto;" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">핵심 평가 중점</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="evalTech" checked>
+                                <label class="form-check-label" for="evalTech">기술적 깊이 및 설계 능력</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="evalFit" checked>
+                                <label class="form-check-label" for="evalFit">이스트소프트 인재상 (몰입/혁신/소통)</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="evalEthic" checked>
+                                <label class="form-check-label" for="evalEthic">데이터/보안 윤리의식 및 문제해결력</label>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-est w-100" id="analyzeBtn">
+                            <i class="bi bi-magic me-2"></i>AI 면접 심사 분석 시작
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- 우측: 분석 결과 출력 -->
+        <div class="col-lg-7">
+            <!-- 로딩 화면 -->
+            <div class="card d-none" id="loadingCard">
+                <div class="card-body text-center py-5">
+                    <div class="spinner-border mb-3" role="status" style="width: 3rem; height: 3rem;"></div>
+                    <h5 class="fw-bold">지원자 역량을 분석하고 있습니다...</h5>
+                    <p class="text-muted">기술 검증 포인트 및 심층 압박 질문을 도출하는 중입니다.</p>
+                </div>
+            </div>
+
+            <!-- 안내 화면 -->
+            <div class="card" id="placeholderCard">
+                <div class="card-body text-center py-5 text-muted">
+                    <i class="bi bi-file-bar-graph display-4 mb-3 text-secondary"></i>
+                    <h5>좌측에 지원자 이력 정보를 입력하고 분석을 진행하세요.</h5>
+                    <p class="mb-0">이스트소프트의 직무 도메인에 최적화된 심사 결과 리포트가 생성됩니다.</p>
+                </div>
+            </div>
+
+            <!-- 결과 리포트 영역 -->
+            <div id="resultArea" class="d-none">
+                <!-- 총평 및 역량 스코어 -->
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-award me-2"></i>AI 면접 심사 요약</span>
+                        <span class="badge bg-success" id="resultMatch">적합도: 높음</span>
+                    </div>
+                    <div class="card-body">
+                        <h6 class="fw-bold text-dark mb-2">핵심 지원자 평가 요약</h6>
+                        <p class="text-secondary" id="summaryText">-</p>
+                        <hr>
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <span class="d-block text-muted small">기술 전문성</span>
+                                <strong class="fs-5 text-primary" id="scoreTech">A+</strong>
+                            </div>
+                            <div class="col-4">
+                                <span class="d-block text-muted small">프로젝트 완성도</span>
+                                <strong class="fs-5 text-primary" id="scoreProject">A</strong>
+                            </div>
+                            <div class="col-4">
+                                <span class="d-block text-muted small">문화적 적합성</span>
+                                <strong class="fs-5 text-primary" id="scoreFit">B+</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 핵심 검증 체크포인트 -->
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-check2-square me-2"></i>실무진/임원진 필수 체크포인트
+                    </div>
+                    <div class="card-body" id="checkpointList">
+                        <!-- 스크립트로 생성 -->
+                    </div>
+                </div>
+
+                <!-- 추천 심층 면접 질문 -->
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-question-circle me-2"></i>추천 심층 면접 질문 세트
+                    </div>
+                    <div class="card-body" id="questionList">
+                        <!-- 스크립트로 생성 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('interviewForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const position = document.getElementById('jobPosition').value;
+        const resume = document.getElementById('resumeText').value;
+
+        // UI 상태 변경
+        document.getElementById('placeholderCard').classList.add('d-none');
+        document.getElementById('resultArea').classList.add('d-none');
+        document.getElementById('loadingCard').classList.remove('d-none');
+
+        // 가상 AI 분석 로직 (2초 후 결과 생성)
+        setTimeout(() => {
+            document.getElementById('loadingCard').classList.add('d-none');
+            document.getElementById('resultArea').classList.remove('d-none');
+
+            // 동적 분석 결과 생성
+            renderAnalysisResult(position, resume);
+        }, 1800);
+    });
+
+    function renderAnalysisResult(position, resume) {
+        // 요약 세팅
+        document.getElementById('summaryText').innerText = 
+            `본 지원자는 ${position} 직군에 필요한 핵심 역량과 경험을 보유하고 있습니다. 포트폴리오 상의 실무 성과 및 문제 해결 사례를 기반으로 구체적인 기술 검증 질문을 구성했습니다.`;
+
+        // 체크포인트 생성
+        const checkpoints = [
+            `주요 프로젝트에서 주장하는 성과지표(성능 개선, 처리 속도 등)의 지원자 직접 기여도 검증`,
+            `${position} 관련 트러블슈팅 상황에서 예외 처리 및 예기치 못한 이슈 대응 방식 확인`,
+            `이스트소프트의 조직 문화(몰입과 자율적인 소통)에 부합하는 협업 경험 및 갈등 해결 사례`
+        ];
+
+        let cpHtml = '';
+        checkpoints.forEach(cp => {
+            cpHtml += `
+                <div class="checkpoint-item">
+                    <i class="bi bi-exclamation-triangle-fill text-warning"></i>
+                    <div>${cp}</div>
+                </div>
+            `;
+        });
+        document.getElementById('checkpointList').innerHTML = cpHtml;
+
+        // 질문 세트 생성
+        const questions = [
+            {
+                type: "기술 검증 (Technical Depth)",
+                q: `${position} 관련 프로젝트 진행 시 선택한 프레임워크/아키텍처의 당위성은 무엇이며, 다른 대안 대비 어떤 이점이 있었습니까?`
+            },
+            {
+                type: "성과 및 기여도 (Contribution)",
+                q: "포트폴리오에 기술된 대표 성과 중 본인이 직접 작성한 코드/설계의 비중은 어느 정도이며, 팀원과의 의견 충돌은 어떻게 해결했나요?"
+            },
+            {
+                type: "압박 및 트러블슈팅 (Troubleshooting)",
+                q: "시스템에 예기치 못한 오류나 성능 병목이 발생했던 가장 치명적인 경험과, 이를 어떤 메트릭을 통해 추적하고 해결했는지 설명해 주세요."
+            },
+            {
+                type: "인재상 및 문화 적합성 (Cultural Fit)",
+                q: "새로운 기술 트렌드나 도구를 빠르게 학습하여 실제 서비스/프로젝트에 성공적으로 적용해 본 경험이 있습니까?"
+            }
+        ];
+
+        let qHtml = '';
+        questions.forEach((item, index) => {
+            qHtml += `
+                <div class="question-box">
+                    <h6>Q${index + 1}. [${item.type}]</h6>
+                    <p class="mb-0 text-dark fw-semibold">${item.q}</p>
+                </div>
+            `;
+        });
+        document.getElementById('questionList').innerHTML = qHtml;
+    }
+</script>
+</body>
+</html>
