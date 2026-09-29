@@ -191,7 +191,7 @@
                 <div class="card flex-fill">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <span><i class="bi bi-sliders me-2"></i>심사 조건 및 이력서 입력</span>
-                        <span class="badge badge-est">1점 단위 정밀 정량분석</span>
+                        <span class="badge badge-est">AI 역량 정량 심사</span>
                     </div>
                     <div class="card-body d-flex flex-column justify-content-between">
                         <form id="interviewForm" class="d-flex flex-column h-100 justify-content-between">
@@ -260,7 +260,7 @@
                             </div>
 
                             <button type="submit" class="btn btn-est w-100 mt-2" id="analyzeBtn">
-                                <i class="bi bi-magic me-2"></i>이력서 심층 정량 채점 및 정밀 분석
+                                <i class="bi bi-magic me-2"></i>이력서 심층 분석 및 직무 적합도 검증
                             </button>
                         </form>
                     </div>
@@ -274,8 +274,8 @@
                 <div class="card flex-fill d-none" id="loadingCard">
                     <div class="card-body d-flex flex-column align-items-center justify-content-center py-5">
                         <div class="spinner-border text-primary mb-3" role="status" style="width: 3.5rem; height: 3.5rem;"></div>
-                        <h5 class="fw-bold">이력서 심층 파싱 및 1점 단위 적합도 채점 중...</h5>
-                        <p class="text-muted small">직무 키워드 상대 밀도, 성과 수치화 비율, 어휘 구사력을 다각도로 분석하고 있습니다.</p>
+                        <h5 class="fw-bold">지원자 역량 및 직무 적합도 다면 분석 중...</h5>
+                        <p class="text-muted small">직무 키워드 상대 밀도, 성과 수치화 비율, 어휘 구사력을 다각도로 정밀 파싱하고 있습니다.</p>
                     </div>
                 </div>
 
@@ -284,7 +284,7 @@
                     <div class="card-body d-flex flex-column align-items-center justify-content-center text-center py-5 text-muted">
                         <i class="bi bi-clipboard2-check display-3 mb-3 text-secondary opacity-50"></i>
                         <h5 class="fw-bold">좌측에 이력 정보를 입력해 주세요.</h5>
-                        <p class="small mb-0">서류 정밀 분석 모델에 기반하여 1점 단위의 정확한 직무 적합도 점수가 생성됩니다.</p>
+                        <p class="small mb-0">이스트소프트 AI 역량 검증 모델에 기반한 다차원 직무 적합도 리포트가 생성됩니다.</p>
                     </div>
                 </div>
 
@@ -307,7 +307,7 @@
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <span><i class="bi bi-graph-up-arrow me-2"></i>직무 정밀 심사 리포트</span>
-                            <span class="badge fs-6 px-3 py-2" id="matchScoreBadge">직무 적합도: -</span>
+                            <span class="badge fs-6 px-3 py-2" id="matchScoreBadge">종합 직무 적합도: -</span>
                         </div>
                         <div class="card-body">
                             <div class="row text-center mb-3">
@@ -525,7 +525,7 @@
         }, 1100);
     });
 
-    // 🧮 1점 단위 정밀 채점 알고리즘 (Fine-grained Scoring Engine)
+    // 🧮 정밀 다차원 채점 알고리즘 (Executive Scoring Engine)
     function validateAndAnalyze(position, requirements, resume) {
         const cleanResume = resume.trim();
         const lowerResume = cleanResume.toLowerCase();
@@ -538,12 +538,12 @@
         // --- A. 기초 작성 상태 검사 ---
         if (cleanResume.length < 80) {
             penaltyPoints += 48;
-            warningReasons.push("이력서 분량 심각 미달 (80자 미만)");
+            warningReasons.push("이력서 분량이 현저히 부족합니다 (80자 미만 제출).");
         }
 
         if (/(.)\1{4,}/.test(cleanResume) || /asdf|test|ㅋㅋㅋ|ㅎㅎㅎ|개소리|아무거나|입력하기싫음|테스트|지껄/i.test(cleanResume)) {
             penaltyPoints += 45;
-            warningReasons.push("장난성 문자 반복 및 불성실 단어 포착");
+            warningReasons.push("장난성 문자 반복 및 불성실 표현이 포착되었습니다.");
         }
 
         // --- B. 23개 직군 교차 도메인 밀도 파싱 ---
@@ -565,21 +565,21 @@
         // 상대 일치율 계산 (Match Ratio)
         const matchRatio = highestMatchCount > 0 ? (selectedMatchCount / highestMatchCount) : 0;
 
-        // 직무 교차 불일치 감지 및 1점 단위 페널티 산출
+        // 직무 교차 불일치 감지 및 페널티 산출
         if (highestMatchJob !== position && highestMatchCount >= 3) {
-            if (matchRatio < 0.25) { // 완전 다른 직무 (예: 총무 서류인데 개발자 선택)
+            if (matchRatio < 0.25) { // 전면 불일치
                 penaltyPoints += 52;
-                warningReasons.push(`[직무 전면 불일치] 실무 경력은 [${highestMatchJob}] (키워드 ${highestMatchCount}개)이나 지원 직군은 [${position}]입니다.`);
-            } else if (matchRatio < 0.60) { // 같은 스태프 직군 내 오지원 (예: 총무 서류인데 인사 선택)
+                warningReasons.push(`[직무 전면 불일치] 실무 경력 도메인은 [${highestMatchJob}] 중심이나 지원 직군은 [${position}]입니다.`);
+            } else if (matchRatio < 0.60) { // 세부 직무 불일치
                 penaltyPoints += 28;
-                warningReasons.push(`[세부 직무 불일치] 이력서는 [${highestMatchJob}] 경험 비중이 우세하며, [${position}] 일치율은 ${Math.round(matchRatio * 100)}% 수준입니다.`);
+                warningReasons.push(`[세부 직무 불일치] 이력서상 [${highestMatchJob}] 경험 비중이 우세하며, [${position}] 직무 일치율은 ${Math.round(matchRatio * 100)}% 수준입니다.`);
             }
         } else if (selectedMatchCount < 2) {
             penaltyPoints += 33;
             warningReasons.push(`[${position}] 직무 전문 키워드가 미흡합니다.`);
         }
 
-        // --- C. 1점 단위 다요소 정량 평가 세부 점수 산출 ---
+        // --- C. 다요소 정량 평가 세부 점수 산출 ---
         
         // 1. 도메인 전문성 점수 (Max 35 pts)
         const domainScore = Math.min(35, Math.round(selectedMatchCount * 3.5 + matchRatio * 15));
@@ -601,11 +601,11 @@
             reqScore = Math.min(20, Math.round((reqMatched.length / Math.max(1, reqWords.length)) * 16 + 4));
         }
 
-        // 고유 어휘 다양성 1점 미세 보정 (Determinism)
+        // 고유 어휘 다양성 보정
         const uniqueWords = new Set(cleanResume.split(/\s+/)).size;
         const diversityBonus = Math.min(3, Math.round((uniqueWords / Math.max(1, cleanResume.split(/\s+/).length)) * 3));
 
-        // --- D. 최종 점수 합산 (0 ~ 100점 1점 단위) ---
+        // --- D. 최종 점수 합산 ---
         let rawTotal = domainScore + lengthScore + metricScore + reqScore + diversityBonus;
         let finalScore = Math.max(12, Math.min(98, rawTotal - penaltyPoints));
 
@@ -622,24 +622,24 @@
 
         if (penaltyPoints >= 35 || finalScore < 60) {
             matchScoreBadge.className = "badge bg-danger fs-6 px-3 py-2";
-            matchScoreBadge.innerText = `적합도: ${finalScore}점 (부적합 / F등급)`;
+            matchScoreBadge.innerText = `종합 적합도: ${finalScore}% (부적합 / F등급)`;
 
-            summaryEl.innerText = `[서류 정밀 검증 실패] 제출된 서류는 [${position}] 직무 적합도 점수가 ${finalScore}점으로 기준치(60점)에 미달합니다. 실제 경력 도메인([${highestMatchJob}])과의 불일치 또는 내용 불성실이 원인입니다.`;
+            summaryEl.innerText = `[서류 정밀 검증 결과] 제출된 서류는 [${position}] 직무 적합도 기준치에 미달합니다. 실제 경력 도메인([${highestMatchJob}])과의 불일치 또는 작성 불성실성이 종합 평가에 반영되었습니다.`;
             warningBox.classList.remove('d-none');
             warningMsg.innerText = warningReasons.join(' / ');
         } else if (penaltyPoints >= 20 || finalScore < 78) {
             matchScoreBadge.className = "badge bg-warning text-dark fs-6 px-3 py-2";
-            matchScoreBadge.innerText = `적합도: ${finalScore}점 (보완 필요 / C등급)`;
+            matchScoreBadge.innerText = `종합 적합도: ${finalScore}% (보완 필요 / C등급)`;
 
-            summaryEl.innerText = `[직무 연관성 주의] 지원 직군 [${position}]에 대한 기본 역량은 포착되나, 이력서 내 [${highestMatchJob}] 요소가 혼재되어 세부 검증이 필요합니다.`;
+            summaryEl.innerText = `[직무 연관성 주의 리포트] 지원 직군 [${position}]에 대한 기본 역량은 포착되나, 서류 내 [${highestMatchJob}] 경력 요소가 혼재되어 심층 검증이 권장됩니다.`;
             warningBox.classList.remove('d-none');
             warningMsg.innerText = warningReasons.join(' / ');
         } else {
             matchScoreBadge.className = "badge bg-success fs-6 px-3 py-2";
-            matchScoreBadge.innerText = `적합도: ${finalScore}점 (우수 / A등급)`;
+            matchScoreBadge.innerText = `종합 적합도: ${finalScore}% (우수 / A등급)`;
 
             const reqText = requirements ? requirements.trim() : "기본 직무 요건";
-            summaryEl.innerText = `[서류 심사 통과] 지원자의 이력서는 [${position}] 직무 전문 키워드(${matchedKeys.join(', ')}) 및 성과 수치화 비율이 양호합니다. (적합도: ${finalScore}점)`;
+            summaryEl.innerText = `[서류 심사 우수 리포트] 지원자의 이력서는 [${position}] 직무 전문 키워드(${matchedKeys.join(', ')}) 및 성과 수치화 비율이 양호하며, 면접관 요구조건("${reqText}")을 충실히 충족합니다.`;
             warningBox.classList.add('d-none');
         }
 
@@ -659,7 +659,7 @@
             badge.className = "badge bg-secondary px-3 py-2";
             badge.innerText = "검증 불가";
             title.innerText = "부적격 서류 제출됨";
-            desc.innerText = "직무 불일치 또는 불성실 서류 제출로 AI 감지 의미가 없습니다.";
+            desc.innerText = "직무 불일치 또는 불성실 서류 제출로 AI 감지 분석 대상이 아닙니다.";
             icon.className = "bi bi-exclamation-triangle-fill fs-4 text-danger";
         } else {
             badge.className = "badge bg-success px-3 py-2";
