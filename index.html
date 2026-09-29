@@ -186,29 +186,47 @@
                 <div class="card flex-fill">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <span><i class="bi bi-sliders me-2"></i>심사 조건 및 이력서 입력</span>
-                        <span class="badge badge-est">직무 교차 검증 엔진</span>
+                        <span class="badge badge-est">23개 IT 전문 직군 세팅</span>
                     </div>
                     <div class="card-body d-flex flex-column justify-content-between">
                         <form id="interviewForm" class="d-flex flex-column h-100 justify-content-between">
                             <div>
-                                <!-- Job Position -->
+                                <!-- Job Position (23 IT Roles) -->
                                 <div class="mb-3">
-                                    <label class="form-label fw-bold"><i class="bi bi-briefcase me-1"></i>지원 직군 선택</label>
+                                    <label class="form-label fw-bold"><i class="bi bi-briefcase me-1"></i>지원 직군 선택 (IT 23개 세부 직군)</label>
                                     <select class="form-select" id="jobPosition" required>
-                                        <optgroup label="개발 / AI / IT">
-                                            <option value="AI / LLM 연구/개발자">AI / LLM 연구/개발자</option>
-                                            <option value="백엔드 / SW 개발자">백엔드 / SW 개발자</option>
-                                            <option value="클라이언트 / 앱 개발자">클라이언트 / 앱 개발자</option>
-                                            <option value="보안 S/W 엔지니어 (알약)">보안 S/W 엔지니어 (알약)</option>
-                                            <option value="AI 서비스 기획 / PM">AI 서비스 기획 / PM</option>
+                                        <optgroup label="🤖 AI & Data Domain">
+                                            <option value="AI / LLM 연구원">AI / LLM 연구원</option>
+                                            <option value="AI / Prompt 엔지니어">AI / Prompt 엔지니어</option>
+                                            <option value="데이터 엔지니어">데이터 엔지니어</option>
+                                            <option value="데이터 사이언티스트 / 분석가">데이터 사이언티스트 / 분석가</option>
                                         </optgroup>
-                                        <optgroup label="경영지원 / 관리">
+                                        <optgroup label="💻 Software & Infra Domain">
+                                            <option value="백엔드 / SW 개발자">백엔드 / SW 개발자</option>
+                                            <option value="프론트엔드 / 웹 개발자">프론트엔드 / 웹 개발자</option>
+                                            <option value="앱 / 클라이언트 개발자">앱 / 클라이언트 개발자 (iOS/Android)</option>
+                                            <option value="DevOps / Cloud SRE">DevOps / Cloud SRE 엔지니어</option>
+                                            <option value="보안 / 리버스 엔지니어">보안 / 리버스 엔지니어 (알약/보안)</option>
+                                            <option value="QA / SW 테스트 엔지니어">QA / SW 테스트 엔지니어</option>
+                                        </optgroup>
+                                        <optgroup label="🎨 Product & Design Domain">
+                                            <option value="AI 서비스 기획 / PM">AI 서비스 기획 / PM</option>
+                                            <option value="테크니컬 PM / PO">테크니컬 PM / PO</option>
+                                            <option value="UI / UX 디자이너">UI / UX 디자이너</option>
+                                            <option value="브랜드 / 그래픽 디자이너">브랜드 / 그래픽 디자이너</option>
+                                        </optgroup>
+                                        <optgroup label="📈 Marketing & Sales Domain">
+                                            <option value="퍼포먼스 마케터">퍼포먼스 마케터</option>
+                                            <option value="콘텐츠 / 브랜딩 마케터">콘텐츠 / 브랜딩 마케터</option>
+                                            <option value="B2B / IT 솔루션 영업">B2B / IT 솔루션 영업</option>
+                                            <option value="사업개발 / BD">사업개발 / BD (Business Development)</option>
+                                        </optgroup>
+                                        <optgroup label="🏢 Corporate & Business Support">
                                             <option value="인사 (HRM / HRD)">인사 (HRM / HRD)</option>
-                                            <option value="총무 / 자산관리">총무 / 자산관리</option>
-                                            <option value="구매 / 자재관리">구매 / 자재관리</option>
                                             <option value="재무 / 회계 / 세무">재무 / 회계 / 세무</option>
-                                            <option value="경영기획 / 경영지원">경영기획 / 경영지원</option>
-                                            <option value="마케팅 / 홍보 / PR">마케팅 / 홍보 / PR</option>
+                                            <option value="총무 / 자산관리">총무 / 자산관리</option>
+                                            <option value="구매 / SCM">구매 / SCM (자재관리)</option>
+                                            <option value="경영기획 / 전략">경영기획 / 전략</option>
                                         </optgroup>
                                     </select>
                                 </div>
@@ -216,7 +234,7 @@
                                 <!-- Target Requirements -->
                                 <div class="mb-3">
                                     <label class="form-label fw-bold"><i class="bi bi-person-check me-1"></i>면접관 요구 스펙/스킬/인성 조건</label>
-                                    <textarea class="form-select" id="targetRequirements" rows="2" placeholder="예: Python, Fast API 숙련자, 대용량 트래픽 경험, 인사 노무법 이해자 우대..." style="height: auto; font-size: 0.9rem;"></textarea>
+                                    <textarea class="form-select" id="targetRequirements" rows="2" placeholder="예: Python, Fast API 숙련자, Figma 활용능력, B2B 영업 경험, 주도성..." style="height: auto; font-size: 0.9rem;"></textarea>
                                 </div>
 
                                 <!-- File Upload -->
@@ -251,8 +269,8 @@
                 <div class="card flex-fill d-none" id="loadingCard">
                     <div class="card-body d-flex flex-column align-items-center justify-content-center py-5">
                         <div class="spinner-border text-primary mb-3" role="status" style="width: 3.5rem; height: 3.5rem;"></div>
-                        <h5 class="fw-bold">이력서 텍스트 분석 및 직무 일치 여부 대조 중...</h5>
-                        <p class="text-muted small">선택하신 지원 직군과 실제 이력서의 전문 도메인 키워드를 교차 정밀검증하고 있습니다.</p>
+                        <h5 class="fw-bold">23개 IT 직군 DB 대조 및 이력서 교차 검증 중...</h5>
+                        <p class="text-muted small">선택 직군의 전문 도메인 키워드와 제출 서류의 실제 경험 내용을 실시간 파싱하고 있습니다.</p>
                     </div>
                 </div>
 
@@ -311,8 +329,8 @@
                     <!-- Question List Card -->
                     <div class="card flex-fill">
                         <div class="card-header d-flex justify-content-between align-items-center">
-                            <span><i class="bi bi-patch-question me-2"></i>직무별 기출 DB 동적 질문 세트 (총 6문항)</span>
-                            <span class="badge bg-secondary">실시간 맞춤 매칭</span>
+                            <span><i class="bi bi-patch-question me-2"></i>23개 IT 직군 맞춤 기출 DB 추출 질문 (총 6문항)</span>
+                            <span class="badge bg-secondary">실시간 키워드 매칭</span>
                         </div>
                         <div class="card-body" id="questionListArea">
                             <!-- Questions inserted here -->
@@ -343,24 +361,45 @@
 <script>
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 
-    // 11개 선택 직군 전체에 대한 핵심 전문 용어 세트 (교차 분석용)
+    // 23개 IT 직군 키워드 매핑 테이블 (직무 교차 오판정 방지용)
     const JOB_KEYWORDS_MAP = {
-        "AI / LLM 연구/개발자": ["ai", "llm", "모델", "python", "파이썬", "pytorch", "tensorflow", "rag", "transformer", "파인튜닝", "gpu", "딥러닝", "머신러닝", "prompt", "vector"],
-        "백엔드 / SW 개발자": ["백엔드", "backend", "java", "자바", "python", "spring", "스프링", "api", "db", "database", "서버", "트래픽", "쿼리", "mysql", "redis", "node", "express", "fastapi"],
-        "클라이언트 / 앱 개발자": ["클라이언트", "앱", "app", "ios", "android", "안드로이드", "swift", "kotlin", "flutter", "react native", "frontend", "프론트엔드", "ui", "ux", "mobile"],
-        "보안 S/W 엔지니어 (알약)": ["보안", "백신", "악성코드", "취약점", "c++", "c언어", "커널", "리버스", "엔진", "알약", "네트워크", "해킹", "yara", "패킷"],
-        "AI 서비스 기획 / PM": ["기획", "pm", "po", "서비스 기획", "화면설계", "와이어프레임", "요구사항", "prd", "ai 서비스", "figma", "프로젝트 관리", "agile", "스크럼"],
-        "인사 (HRM / HRD)": ["인사", "채용", "hr", "hrm", "hrd", "노무", "평가", "교육", "근로기준법", "급여", "조직", "연봉", "노무법", "온보딩", "취업규칙"],
-        "총무 / 자산관리": ["총무", "자산", "자산관리", "비품", "시설", "사옥", "임대차", "의전", "행사", "구매계약", "소모품", "배차", "복리후생", "시설관리", "비품관리"],
-        "구매 / 자재관리": ["구매", "자재", "발주", "입고", "출고", "재고", "공급사", "납기", "단가", "조달", "견적", "vendor", "scm"],
-        "재무 / 회계 / 세무": ["회계", "세무", "결산", "전표", "세금", "재무", "감사", "erp", "부가가치세", "원천세", "k-ifrs", "법인세", "자금", "손익"],
-        "경영기획 / 경영지원": ["경영기획", "경영지원", "예산", "kpi", "okr", "손익", "사업계획", "경영진 보고", "이사회", "손익분석", "m&a", "전략"],
-        "마케팅 / 홍보 / PR": ["마케팅", "홍보", "pr", "광고", "퍼포먼스", "sns", "콘텐츠", "브랜딩", "캠페인", "roas", "ga4", "검색광고", "보도자료"]
+        // AI & Data
+        "AI / LLM 연구원": ["ai", "llm", "모델", "python", "파이썬", "pytorch", "tensorflow", "rag", "transformer", "파인튜닝", "gpu", "딥러닝", "논문", "vector"],
+        "AI / Prompt 엔지니어": ["프롬프트", "prompt", "gpt", "chatgpt", "llm", "생성형 ai", "few-shot", "cot", "파이프라인", "워크플로우", "에이전트"],
+        "데이터 엔지니어": ["데이터 엔지니어", "pipeline", "파이프라인", "spark", "hadoop", "kafka", "airflow", "etl", "data warehouse", "sql", "bigquery"],
+        "데이터 사이언티스트 / 분석가": ["데이터 분석", "사이언티스트", "통계", "python", "r", "sql", "tableau", "시각화", "A/B 테스트", "가설 검증", "판다스", "pandas"],
+        
+        // Software & Infra
+        "백엔드 / SW 개발자": ["백엔드", "backend", "java", "자바", "python", "spring", "스프링", "api", "db", "서버", "트래픽", "쿼리", "mysql", "redis", "fastapi"],
+        "프론트엔드 / 웹 개발자": ["프론트엔드", "frontend", "react", "vue", "next.js", "typescript", "타입스크립트", "javascript", "css", "html", "웹 개발", "상태 관리"],
+        "앱 / 클라이언트 개발자": ["앱", "클라이언트", "ios", "android", "안드로이드", "swift", "kotlin", "flutter", "react native", "모바일", "스위프트", "코틀린"],
+        "DevOps / Cloud SRE": ["devops", "sre", "aws", "cloud", "쿠버네티스", "kubernetes", "docker", "도커", "CI/CD", "테라폼", "인프라", "가용성", "모니터링"],
+        "보안 / 리버스 엔지니어": ["보안", "백신", "악성코드", "취약점", "c++", "커널", "리버스", "엔진", "알약", "네트워크", "해킹", "yara", "패킷", "리버싱"],
+        "QA / SW 테스트 엔지니어": ["qa", "테스트", "품질", "test", "자동화", "selenium", "cypress", "버그", "TC", "테스트케이스", "검증", "품질보증"],
+        
+        // Product & Design
+        "AI 서비스 기획 / PM": ["ai 서비스", "기획", "pm", "po", "화면설계", "와이어프레임", "요구사항", "prd", "figma", "피그마", "프로젝트 관리", "agile"],
+        "테크니컬 PM / PO": ["tpm", "테크니컬 pm", "po", "기술 기획", "아키텍처", "개발 일정", "스프린트", "지라", "jira", "백로그", "기술 요구사항"],
+        "UI / UX 디자이너": ["ui", "ux", "디자인", "figma", "피그마", "와이어프레임", "프로토타입", "디자인 시스템", "사용성", "인터페이스", "유저 리서치"],
+        "브랜드 / 그래픽 디자이너": ["그래픽", "브랜드", "브랜딩", "포토샵", "일러스트", "photoshop", "비주얼", "bx", "키비주얼", "상세페이지", "모션"],
+        
+        // Marketing & Sales
+        "퍼포먼스 마케터": ["퍼포먼스", "마케팅", "광고", "roas", "cpa", "cpc", "ga4", "mmp", "애널리틱스", "타겟팅", "매체", "검색광고"],
+        "콘텐츠 / 브랜딩 마케터": ["콘텐츠", "브랜딩", "마케팅", "sns", "인스타그램", "유튜브", "블로그", "카피라이팅", "보도자료", "캠페인", "채널"],
+        "B2B / IT 솔루션 영업": ["b2b", "영업", "솔루션 영업", "고객사", "제안서", "파이프라인", "수주", "매출", "계약", "it 영업", "saas"],
+        "사업개발 / BD": ["사업개발", "bd", "제휴", "파트너십", "신사업", "bm", "비즈니스 모델", "시장 조사", "전략 제휴", "수익 모델"],
+        
+        // Corporate Support
+        "인사 (HRM / HRD)": ["인사", "채용", "hr", "hrm", "hrd", "노무", "평가", "교육", "근로기준법", "급여", "조직", "연봉", "노무법", "온보딩"],
+        "재무 / 회계 / 세무": ["회계", "세무", "결산", "전표", "세금", "재무", "감사", "erp", "부가가치세", "원천세", "k-ifrs", "법인세", "자금"],
+        "총무 / 자산관리": ["총무", "자산", "자산관리", "비품", "시설", "사옥", "임대차", "의전", "행사", "구매계약", "소모품", "배차", "복리후생"],
+        "구매 / SCM": ["구매", "scm", "자재", "발주", "입고", "출고", "재고", "공급사", "납기", "단가", "조달", "견적", "vendor"],
+        "경영기획 / 전략": ["경영기획", "경영지원", "예산", "kpi", "okr", "손익", "사업계획", "경영진 보고", "이사회", "손익분석", "전략"]
     };
 
-    // 📚 30+ 기출 질문 DB
+    // 📚 23개 IT 직군별 맞춤 질문 DB
     const QUESTION_DATABASE = {
-        "AI / LLM 연구/개발자": {
+        "AI / LLM 연구원": {
             light: [
                 "최근 읽으신 [{skill}] 관련 논문이나 연구 중 가장 인상 깊었던 핵심 알고리즘 아이디어는 무엇인가요?",
                 "새로운 [{skill}] 오픈소스 모델이나 프레임워크가 출시되었을 때 빠르게 습득하는 본인만의 학습 루틴이 있나요?"
@@ -386,6 +425,62 @@
             deep: [
                 "[{skill}] 활용 중 트랜잭션 동시성 문제로 장애가 발생했던 경험과 이를 해결한 구체적 로직을 설명해 주세요.",
                 "제출하신 결과물 중 Copilot/ChatGPT 등 AI 도구를 사용한 범위와 본인이 직접 코어 로직을 설계한 부분을 구별하여 설명해 주세요."
+            ]
+        },
+        "프론트엔드 / 웹 개발자": {
+            light: [
+                "웹 개발 시 웹 접근성(WA)과 크로스 브라우징 이슈를 해결했던 가장 기억에 남는 [{skill}] 작업 경험은 무엇인가요?",
+                "새로운 프론트엔드 상태 관리 라이브러리나 기술 스택을 프로젝트에 도입할 때 고려하는 기준은 무엇인가요?"
+            ],
+            work: [
+                "기재해 주신 {metric} 성과와 관련하여, [{skill}] 기반의 웹 페이지 렌더링 성능(LCP, FID, CLS 등)을 최적화한 실무 경험을 설명해 주세요.",
+                "디자이너 및 백엔드 개발자와 협업 시 [{skill}] 컴포넌트 재사용성을 끌어올린 디자인 시스템 구축 경험이 있나요?"
+            ],
+            deep: [
+                "[{skill}] 상태 관리 아키텍처 설계 중 상태 복잡도로 인해 발생했던 버그와 이를 수습했던 프로세스를 말씀해 주세요.",
+                "SPA 환경에서 SEO(검색엔진 최적화) 및 SSR(Next.js 등)을 구현하며 겪었던 백엔드 통신 이슈를 해결한 사례는 무엇인가요?"
+            ]
+        },
+        "DevOps / Cloud SRE": {
+            light: [
+                "클라우드 인프라 운영 시 가용성(Availability)과 비용 절감(Cost-efficiency) 사이의 균형을 잡는 본인만의 기준은 무엇인가요?",
+                "[{skill}] 환경에서 장애 상황이 발생했을 때 신속한 알림 수신 및 사고 대응(Post-mortem) 절차는 어떻게 되나요?"
+            ],
+            work: [
+                "서류의 {metric} 대목과 관련하여, [{skill}] 기반 CI/CD 파이프라인 단축 및 무중단 배포(Blue-Green, Canary)를 구현한 역할을 설명해 주세요.",
+                "쿠버네티스(Kubernetes)나 IaC(Terraform)를 통해 클라우드 리소스를 코드 기반으로 자동화 관리해 본 실무 경험을 말씀해 주세요."
+            ],
+            deep: [
+                "갑작스러운 대규모 트래픽 폭주 상황에서 Auto-scaling이 지연되어 발생한 인프라 잼 현상을 해결했던 트러블슈팅 경험은 어떠했나요?",
+                "[{skill}] 기반 모니터링 시스템 구축 중 잘못된 메트릭 설정으로 오알람이 다수 발생했을 때 모니터링 시스템을 정제했던 사례가 있나요?"
+            ]
+        },
+        "UI / UX 디자이너": {
+            light: [
+                "사용자 경험(UX)을 설계할 때 본인의 디자인 직관과 실제 사용자 리서치 데이터 중 어느 쪽에 더 무게를 두시나요?",
+                "개발자나 기획자와 디자인 구현 가능성을 두고 기술적 제약에 부딪혔을 때 타협하고 해결한 소통 방식은 무엇인가요?"
+            ],
+            work: [
+                "서류상의 {metric} 성과와 관련하여, [{skill}] 피그마(Figma) 기반 디자인 시스템을 구축해 팀 전체 생산성을 높인 경험을 공유해 주세요.",
+                "사용자 유저 테스트(UT)나 A/B 테스트 결과를 바탕으로 UX 인터페이스 흐름을 개선하여 전환율을 올린 실무 사례를 말씀해 주세요."
+            ],
+            deep: [
+                "본인이 정성껏 디자인한 시안이 비즈니스 우선순위 밀려 대폭 변경되었을 때, 핵심 UX 가치를 지켜내기 위해 설득했던 과정을 설명해 주세요.",
+                "제출하신 포트폴리오 작업물 중 AI 생성 이미지/디자인 도구를 활용한 비중과 본인만의 UX 논리가 담긴 영역을 구별하여 설명해 주세요."
+            ]
+        },
+        "퍼포먼스 마케터": {
+            light: [
+                "급변하는 디지털 매체 트렌드 속에서 새로운 광고 매체를 발굴하고 테스트하는 본인만의 기준은 무엇인가요?",
+                "마케팅 캠페인 수립 시 브랜드 메시지 전달과 단기 ROAS 달성 중 우선순위를 정하는 방식은 어떠한가요?"
+            ],
+            work: [
+                "기재해주신 {metric} 대목과 관련하여, [{skill}] 기반 타겟팅 및 GA4/MMP 데이터 분석을 통해 CAC를 낮춘 실제 집행 사례를 설명해 주세요.",
+                "A/B 테스트를 위한 광고 소재 기획부터 데이터 트래킹 및 소구점 분석까지 수립했던 캠페인 프로세스는 어떠했나요?"
+            ],
+            deep: [
+                "광고 성과 측정 중 추적 데이터 오차(Attribution 이슈)가 발생했거나 매체 효율이 급락했을 때 이를 수습했던 트러블슈팅 경험을 공유해 주세요.",
+                "제출된 포트폴리오 기획서 작성 시 AI 도구의 도움을 받은 영역과 지원자님만의 퍼포먼스 데이터 인사이트 영역을 구별하여 말씀해 주세요."
             ]
         },
         "총무 / 자산관리": {
@@ -467,7 +562,7 @@
         }, 1000);
     });
 
-    // 🔍 실시간 교차 검증 및 직무 불일치 감지 알고리즘
+    // 🔍 23개 IT 직군 교차 검증 및 지적 알고리즘
     function validateAndAnalyze(position, requirements, resume) {
         const cleanResume = resume.trim();
         const lowerResume = cleanResume.toLowerCase();
@@ -477,7 +572,7 @@
         let penaltyCount = 0;
         let warningReasons = [];
 
-        // 1. 기본 성실도 검사 (분량/장난성 텍스트)
+        // 1. 기본 성실도 검사
         if (cleanResume.length < 80) {
             penaltyCount += 55;
             warningReasons.push("이력서 분량이 현저히 부족합니다 (80자 미만 제출).");
@@ -488,11 +583,10 @@
             warningReasons.push("장난스러운 문자 반복이나 무성의한 단어가 포함되어 있습니다.");
         }
 
-        // 2. 🔀 [핵심] 직무 교차 매칭 검사
+        // 2. 🔀 23개 직군 키워드 교차 매칭 검사
         const selectedJobKeys = JOB_KEYWORDS_MAP[position] || ["경험", "업무", "역량"];
         const matchedKeys = selectedJobKeys.filter(k => lowerResume.includes(k));
 
-        // 전체 11개 직군 중 지원자 이력서와 가장 많이 일치하는 '실제 직무' 찾기
         let highestMatchJob = "";
         let highestMatchCount = 0;
 
@@ -504,10 +598,9 @@
             }
         }
 
-        // 🚨 직무 불일치(Job Mismatch) 오판정 감지 로직
-        // 선택한 직군의 키워드는 1개 이하인데, 다른 직군(예: 총무)의 키워드가 3개 이상 검출될 때
+        // 🚨 직무 불일치(Job Mismatch) 오판정 감지
         if (matchedKeys.length < 2 && highestMatchCount >= 3 && highestMatchJob !== position) {
-            penaltyCount += 60; // 즉시 부적합 F등급으로 추락
+            penaltyCount += 60;
             warningReasons.push(`[직무 불일치 경고] 제출된 이력서는 [${highestMatchJob}] 분야의 실무 경험 중심이나, 현재 선택된 지원 직군은 [${position}]입니다.`);
         } else if (matchedKeys.length < 2) {
             penaltyCount += 40;
@@ -542,10 +635,10 @@
 
             const reqText = requirements ? requirements.trim() : "해당 직무 요구조건";
             summaryEl.innerText = `지원자의 서류 교차 검증이 통과되었습니다. 감지된 [${position}] 핵심 키워드(${matchedKeys.join(', ')}) 및 요구조건("${reqText}")을 바탕으로 맞춤 질문을 추출했습니다.`;
-            warningBox.classList.add('d-none');
+            warningBox.add('d-none');
         }
 
-        // 4. AI 에이전트 작성 여부 판별
+        // 4. AI 작성 감지
         const badge = document.getElementById('aiDetectBadge');
         const title = document.getElementById('aiDetectTitle');
         const desc = document.getElementById('aiDetectDesc');
@@ -571,23 +664,23 @@
             icon.className = "bi bi-person-check-fill fs-4 text-success";
         }
 
-        // 5. 질문 추출
+        // 5. 질문 조합
         const dynamicQuestions = buildDynamicQuestions(position, requirements, cleanResume);
         renderQuestions(dynamicQuestions);
     }
 
-    // 🧩 텍스트 파싱 기반 질문 생성
+    // 🧩 23개 IT 직군 동적 질문 생성기
     function buildDynamicQuestions(position, requirements, resume) {
         const words = resume.replace(/[^\w\s가-힣]/g, ' ').split(/\s+/).filter(w => w.length >= 2);
         const techKeywords = Array.from(new Set(words.filter(w => 
-            /Python|Java|React|Vue|Spring|FastAPI|SQL|AWS|Docker|Kubernetes|LLM|PyTorch|TensorFlow|HR|세무|회계|마케팅|기획|구매|총무|ERP|Excel|알약|보안|리버스|노무|연봉|근로기준법|채용|결산|자산|시설|비품/i.test(w)
+            /Python|Java|React|Vue|Spring|FastAPI|SQL|AWS|Docker|Kubernetes|LLM|PyTorch|TensorFlow|HR|세무|회계|마케팅|기획|구매|총무|ERP|Excel|알약|보안|리버스|노무|연봉|근로기준법|채용|결산|자산|시설|비품|피그마|Figma|GA4|MMP|QA|테스트/i.test(w)
         )));
 
         const sentences = resume.split(/[.!?\n]+/).filter(s => s.trim().length > 8);
         const metricSentences = sentences.filter(s => /\d+%|\d+개|\d+원|\d+건|개선|증가|감소|달성|구축|개편|담당|수행/i.test(s));
 
         const skill1 = techKeywords[0] || `${position} 메인 실무`;
-        const skill2 = techKeywords[1] || `${position} 연관 업무`;
+        const skill2 = techKeywords[1] || `${position} 연관 역량`;
         const metricPoint = metricSentences.length > 0 
             ? `"${metricSentences[0].trim().slice(0, 35)}..."` 
             : `"${sentences[0] ? sentences[0].trim().slice(0, 30) : '주요 실무 성과'}"`;
