@@ -525,24 +525,24 @@
         }, 1100);
     });
 
-    // 🧮 정밀 다차원 채점 알고리즘 (Executive Scoring Engine)
+    // 🧮 조건부 직무 검증 채점 엔진 (Conditional Role Matching Engine)
     function validateAndAnalyze(position, requirements, resume) {
         const cleanResume = resume.trim();
         const lowerResume = cleanResume.toLowerCase();
         const warningBox = document.getElementById('warningBox');
         const warningMsg = document.getElementById('warningMsg');
 
-        let penaltyPoints = 0;
         let warningReasons = [];
 
         // --- A. 기초 작성 상태 검사 ---
+        let basicSanityPenalty = 0;
         if (cleanResume.length < 80) {
-            penaltyPoints += 48;
+            basicSanityPenalty += 40;
             warningReasons.push("이력서 분량이 현저히 부족합니다 (80자 미만 제출).");
         }
 
         if (/(.)\1{4,}/.test(cleanResume) || /asdf|test|ㅋㅋㅋ|ㅎㅎㅎ|개소리|아무거나|입력하기싫음|테스트|지껄/i.test(cleanResume)) {
-            penaltyPoints += 45;
+            basicSanityPenalty += 40;
             warningReasons.push("장난성 문자 반복 및 불성실 표현이 포착되었습니다.");
         }
 
@@ -562,38 +562,37 @@
             }
         }
 
-        // 상대 일치율 계산 (Match Ratio)
-        const matchRatio = highestMatchCount > 0 ? (selectedMatchCount / highestMatchCount) : 0;
+        // --- C. 조건부 가감 없는 감점 vs 미미한 감점 로직 ---
+        let mismatchPenalty = 0;
+        
+        // 지원 직군 기본 요건 충족 여부 (키워드 3개 이상 포착 시 기본 충족으로 인정)
+        const isTargetRoleFulfilled = selectedMatchCount >= 3;
 
-        // 직무 교차 불일치 감지 및 페널티 산출
-        if (highestMatchJob !== position && highestMatchCount >= 3) {
-            if (matchRatio < 0.25) { // 전면 불일치
-                penaltyPoints += 52;
-                warningReasons.push(`[직무 전면 불일치] 실무 경력 도메인은 [${highestMatchJob}] 중심이나 지원 직군은 [${position}]입니다.`);
-            } else if (matchRatio < 0.60) { // 세부 직무 불일치
-                penaltyPoints += 28;
-                warningReasons.push(`[세부 직무 불일치] 이력서상 [${highestMatchJob}] 경험 비중이 우세하며, [${position}] 직무 일치율은 ${Math.round(matchRatio * 100)}% 수준입니다.`);
+        if (highestMatchJob !== position && highestMatchCount > selectedMatchCount) {
+            if (isTargetRoleFulfilled) {
+                // [조건 1] 지원 직군 내용이 충분히 충족된 경우 -> 타 직군 언급이 있어도 감점 미미 (0~4점)
+                const diff = highestMatchCount - selectedMatchCount;
+                mismatchPenalty = Math.min(4, diff * 1); 
+            } else {
+                // [조건 2] 지원 직군 기본 충족 미흡 + 타 직군이 주 경력인 경우 -> 가감 없이 정밀 엄격 감점 (35~50점)
+                const diff = highestMatchCount - selectedMatchCount;
+                mismatchPenalty = Math.min(50, 35 + diff * 4); 
+                warningReasons.push(`[주 경력 미부합 감점] 지원 직군 [${position}]의 핵심 역량 충족(${selectedMatchCount}개 감지)이 미흡한 반면, 이력서의 주 경력 도메인은 [${highestMatchJob}](${highestMatchCount}개 감지)에 집중되어 있습니다. 경력 미부합으로 인한 정밀 감점(-${mismatchPenalty}점)이 부과되었습니다.`);
             }
         } else if (selectedMatchCount < 2) {
-            penaltyPoints += 33;
-            warningReasons.push(`[${position}] 직무 전문 키워드가 미흡합니다.`);
+            mismatchPenalty = 25;
+            warningReasons.push(`[${position}] 지원 직무의 핵심 전문 키워드가 서류에서 충분히 발견되지 않았습니다 (${selectedMatchCount}개 감지).`);
         }
 
-        // --- C. 다요소 정량 평가 세부 점수 산출 ---
+        // --- D. 절대 누적 + 포화 채점 체계 ---
+        const domainScore = Math.min(35, Math.round(selectedMatchCount * 5.5));
         
-        // 1. 도메인 전문성 점수 (Max 35 pts)
-        const domainScore = Math.min(35, Math.round(selectedMatchCount * 3.5 + matchRatio * 15));
-
-        // 2. 이력서 구조 및 분량 깊이 점수 (Max 20 pts)
         const sentences = cleanResume.split(/[.!?\n]+/).filter(s => s.trim().length > 6);
-        const lengthScore = Math.min(20, Math.round(Math.log2(cleanResume.length + 1) * 2.2));
+        const lengthScore = Math.min(20, Math.round(Math.log10(cleanResume.length + 1) * 6.5));
 
-        // 3. 성과 수치화 비율 점수 (Max 25 pts)
         const metricSentences = sentences.filter(s => /\d+%|\d+개|\d+원|\d+건|개선|증가|감소|달성|구축|개편|담당|수행/i.test(s));
-        const metricRatio = sentences.length > 0 ? (metricSentences.length / sentences.length) : 0;
-        const metricScore = Math.min(25, Math.round(metricSentences.length * 3 + metricRatio * 12));
+        const metricScore = Math.min(25, Math.round(metricSentences.length * 4.5));
 
-        // 4. 면접관 요구조건 부합도 점수 (Max 20 pts)
         let reqScore = 14;
         if (requirements.trim().length > 0) {
             const reqWords = requirements.replace(/[^\w\s가-힣]/g, ' ').split(/\s+/).filter(w => w.length >= 2);
@@ -601,15 +600,15 @@
             reqScore = Math.min(20, Math.round((reqMatched.length / Math.max(1, reqWords.length)) * 16 + 4));
         }
 
-        // 고유 어휘 다양성 보정
-        const uniqueWords = new Set(cleanResume.split(/\s+/)).size;
-        const diversityBonus = Math.min(3, Math.round((uniqueWords / Math.max(1, cleanResume.split(/\s+/).length)) * 3));
+        // --- E. 최종 점수 합산 ---
+        let rawTotal = domainScore + lengthScore + metricScore + reqScore;
+        let totalPenalty = basicSanityPenalty + mismatchPenalty;
+        let finalScore = Math.max(10, Math.min(98, rawTotal - totalPenalty));
 
-        // --- D. 최종 점수 합산 ---
-        let rawTotal = domainScore + lengthScore + metricScore + reqScore + diversityBonus;
-        let finalScore = Math.max(12, Math.min(98, rawTotal - penaltyPoints));
+        const metricRatioVal = sentences.length > 0 ? (metricSentences.length / sentences.length) : 0;
+        const matchRatioVal = highestMatchCount > 0 ? (selectedMatchCount / highestMatchCount) : 0;
 
-        // --- E. UI 매핑 및 리포트 출력 ---
+        // --- F. UI 매핑 및 리포트 문구 출력 ---
         const matchScoreBadge = document.getElementById('matchScoreBadge');
         const specEl = document.getElementById('scoreSpec');
         const skillEl = document.getElementById('scoreSkill');
@@ -617,21 +616,21 @@
         const summaryEl = document.getElementById('summaryAnalysisText');
 
         specEl.innerText = `${Math.min(100, Math.round((selectedMatchCount / 6) * 100))}%`;
-        skillEl.innerText = `${Math.round(metricRatio * 100)}%`;
-        fitEl.innerText = `${Math.round(matchRatio * 100)}%`;
+        skillEl.innerText = `${Math.round(metricRatioVal * 100)}%`;
+        fitEl.innerText = `${Math.round(matchRatioVal * 100)}%`;
 
-        if (penaltyPoints >= 35 || finalScore < 60) {
+        if (totalPenalty >= 35 || finalScore < 60) {
             matchScoreBadge.className = "badge bg-danger fs-6 px-3 py-2";
             matchScoreBadge.innerText = `종합 적합도: ${finalScore}% (부적합 / F등급)`;
 
-            summaryEl.innerText = `[서류 정밀 검증 결과] 제출된 서류는 [${position}] 직무 적합도 기준치에 미달합니다. 실제 경력 도메인([${highestMatchJob}])과의 불일치 또는 작성 불성실성이 종합 평가에 반영되었습니다.`;
+            summaryEl.innerText = `[서류 정밀 검증 결과] 제출된 서류는 [${position}] 직무 적합도 기준치에 미달합니다. 지원 직군 핵심 역량 부족 및 주 경력 도메인([${highestMatchJob}]) 미부합이 평가에 차감 반영되었습니다.`;
             warningBox.classList.remove('d-none');
             warningMsg.innerText = warningReasons.join(' / ');
-        } else if (penaltyPoints >= 20 || finalScore < 78) {
+        } else if (totalPenalty >= 18 || finalScore < 78) {
             matchScoreBadge.className = "badge bg-warning text-dark fs-6 px-3 py-2";
             matchScoreBadge.innerText = `종합 적합도: ${finalScore}% (보완 필요 / C등급)`;
 
-            summaryEl.innerText = `[직무 연관성 주의 리포트] 지원 직군 [${position}]에 대한 기본 역량은 포착되나, 서류 내 [${highestMatchJob}] 경력 요소가 혼재되어 심층 검증이 권장됩니다.`;
+            summaryEl.innerText = `[직무 연관성 검증 리포트] 지원 직군 [${position}]에 대한 주요 역량은 확인되나, 타 도메인([${highestMatchJob}]) 요소가 혼재되어 세부 면접 검증이 권장됩니다.`;
             warningBox.classList.remove('d-none');
             warningMsg.innerText = warningReasons.join(' / ');
         } else {
@@ -639,23 +638,28 @@
             matchScoreBadge.innerText = `종합 적합도: ${finalScore}% (우수 / A등급)`;
 
             const reqText = requirements ? requirements.trim() : "기본 직무 요건";
-            summaryEl.innerText = `[서류 심사 우수 리포트] 지원자의 이력서는 [${position}] 직무 전문 키워드(${matchedKeys.join(', ')}) 및 성과 수치화 비율이 양호하며, 면접관 요구조건("${reqText}")을 충실히 충족합니다.`;
+            
+            if (highestMatchJob !== position && isTargetRoleFulfilled) {
+                summaryEl.innerText = `[서류 심사 우수 리포트] 이력서에 타 직군([${highestMatchJob}]) 관련 경험이 함께 포함되어 있으나, 지원 직무 [${position}]의 필수 전문 역량(${matchedKeys.join(', ')})이 충분히 입증되어 감점을 최소화하고 우수 평가를 부여했습니다.`;
+            } else {
+                summaryEl.innerText = `[서류 심사 우수 리포트] 지원자의 이력서는 [${position}] 직무 전문 키워드(${matchedKeys.join(', ')}) 및 성과 수치화 비율이 우수하며, 면접관 요구조건("${reqText}")을 충실히 충족합니다.`;
+            }
             warningBox.classList.add('d-none');
         }
 
-        // --- F. AI 작성 여부 판별 ---
+        // --- G. AI 작성 여부 판별 ---
         const badge = document.getElementById('aiDetectBadge');
         const title = document.getElementById('aiDetectTitle');
         const desc = document.getElementById('aiDetectDesc');
         const icon = document.getElementById('aiIcon');
 
-        if (cleanResume.length > 1800 && penaltyPoints < 35) {
+        if (cleanResume.length > 1800 && totalPenalty < 35) {
             badge.className = "badge bg-danger px-3 py-2";
             badge.innerText = "AI 작성 감지 (78%)";
             title.innerText = "AI 에이전트 활용 작성 가능성 감지";
             desc.innerText = "정형화된 대량 서술 패턴이 포착되었습니다. 실제 본인 수행 여부를 심층 검증하세요.";
             icon.className = "bi bi-robot fs-4 text-warning";
-        } else if (penaltyPoints >= 35) {
+        } else if (totalPenalty >= 35) {
             badge.className = "badge bg-secondary px-3 py-2";
             badge.innerText = "검증 불가";
             title.innerText = "부적격 서류 제출됨";
@@ -669,7 +673,7 @@
             icon.className = "bi bi-person-check-fill fs-4 text-success";
         }
 
-        // --- G. 질문 추출 ---
+        // --- H. 질문 추출 ---
         const dynamicQuestions = buildDynamicQuestions(position, requirements, cleanResume);
         renderQuestions(dynamicQuestions);
     }
