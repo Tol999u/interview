@@ -1,81 +1,576 @@
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EST INTERVIEW - AI 면접심사 솔루션</title>
+    <!-- Bootstrap 5 CSS & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <!-- PDF.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <style>
+        :root {
+            --est-blue: #0055FF;
+            --est-dark: #0B0E14;
+            --est-card-bg: #FFFFFF;
+            --est-bg: #F4F7FB;
+        }
 
-    // 📚 직무별 기출 면접 질문 DB (변수 주입형 템플릿)
+        html, body {
+            height: 100%;
+            background-color: var(--est-bg);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: #2D3748;
+        }
+
+        .app-wrapper {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background-color: var(--est-dark);
+            border-bottom: 3px solid var(--est-blue);
+            padding: 14px 28px;
+        }
+        .navbar-brand {
+            font-weight: 900;
+            font-size: 1.4rem;
+            letter-spacing: -0.5px;
+            color: #FFFFFF !important;
+        }
+        .navbar-brand span {
+            color: var(--est-blue);
+        }
+
+        .main-container {
+            flex: 1;
+            padding: 24px 32px;
+        }
+
+        .card {
+            border: none;
+            border-radius: 14px;
+            box-shadow: 0 4px 20px rgba(0, 85, 255, 0.06);
+            background-color: var(--est-card-bg);
+            height: 100%;
+        }
+
+        .card-header {
+            background-color: #FFFFFF;
+            border-bottom: 1px solid #E2E8F0;
+            padding: 18px 24px;
+            font-weight: 700;
+            font-size: 1.05rem;
+            border-radius: 14px 14px 0 0 !important;
+        }
+
+        .btn-est {
+            background-color: var(--est-blue);
+            color: #FFFFFF;
+            font-weight: 700;
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: none;
+            transition: all 0.2s ease-in-out;
+            font-size: 1rem;
+        }
+        .btn-est:hover {
+            background-color: #0044CC;
+            color: #FFFFFF;
+            transform: translateY(-1px);
+        }
+
+        .badge-est {
+            background-color: rgba(0, 85, 255, 0.1);
+            color: var(--est-blue);
+            font-weight: 700;
+            padding: 6px 12px;
+            border-radius: 6px;
+        }
+
+        .question-card {
+            border-left: 4px solid var(--est-blue);
+            background: #FFFFFF;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-radius: 0 10px 10px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            border-top: 1px solid #F0F4F8;
+            border-right: 1px solid #F0F4F8;
+            border-bottom: 1px solid #F0F4F8;
+        }
+        .q-tag-light { border-left-color: #20C997; }
+        .q-tag-work { border-left-color: var(--est-blue); }
+        .q-tag-deep { border-left-color: #FD7E14; }
+
+        .q-badge-light { background-color: #E6FCF5; color: #0CA678; }
+        .q-badge-work { background-color: #E7F5FF; color: #1971C2; }
+        .q-badge-deep { background-color: #FFF4E6; color: #D9480F; }
+
+        .ai-detector-box {
+            border-radius: 10px;
+            padding: 14px;
+            background-color: #FFF9DB;
+            border: 1px solid #FFE066;
+            margin-bottom: 16px;
+        }
+
+        .file-drop-area {
+            border: 2px dashed #CBD5E1;
+            border-radius: 10px;
+            padding: 14px;
+            text-align: center;
+            background-color: #F8FAFC;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .file-drop-area:hover {
+            background-color: #F1F5F9;
+            border-color: var(--est-blue);
+        }
+
+        footer {
+            background-color: var(--est-dark);
+            color: #A0AEC0;
+            padding: 20px 32px;
+            font-size: 0.88rem;
+            border-top: 1px solid #2D3748;
+        }
+        .footer-logo {
+            font-weight: 900;
+            color: #FFFFFF;
+            font-size: 1.1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .footer-logo .t9-badge {
+            background: var(--est-blue);
+            color: #fff;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .warning-text-box {
+            background-color: #FFF5F5;
+            border: 1px solid #FEB2B2;
+            color: #C53030;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-wrapper">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid px-2">
+            <a class="navbar-brand" href="#"><i class="bi bi-cpu-fill me-2"></i>EST <span>INTERVIEW</span></a>
+            <span class="text-white-50 small"><i class="bi bi-shield-check me-1"></i>이스트소프트 AI 면접심사 및 직무 적합도 검증 솔루션</span>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <div class="row g-4 h-100">
+            
+            <!-- Left Side Inputs -->
+            <div class="col-xl-5 col-lg-6 d-flex flex-column">
+                <div class="card flex-fill">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-sliders me-2"></i>심사 조건 및 이력서 입력</span>
+                        <span class="badge badge-est">대용량 족보 DB 매칭 엔진</span>
+                    </div>
+                    <div class="card-body d-flex flex-column justify-content-between">
+                        <form id="interviewForm" class="d-flex flex-column h-100 justify-content-between">
+                            <div>
+                                <!-- Job Position -->
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold"><i class="bi bi-briefcase me-1"></i>지원 직군 선택</label>
+                                    <select class="form-select" id="jobPosition" required>
+                                        <optgroup label="개발 / AI / IT">
+                                            <option value="AI / LLM 연구/개발자">AI / LLM 연구/개발자</option>
+                                            <option value="백엔드 / SW 개발자">백엔드 / SW 개발자</option>
+                                            <option value="클라이언트 / 앱 개발자">클라이언트 / 앱 개발자</option>
+                                            <option value="보안 S/W 엔지니어 (알약)">보안 S/W 엔지니어 (알약)</option>
+                                            <option value="AI 서비스 기획 / PM">AI 서비스 기획 / PM</option>
+                                        </optgroup>
+                                        <optgroup label="경영지원 / 관리">
+                                            <option value="인사 (HRM / HRD)">인사 (HRM / HRD)</option>
+                                            <option value="총무 / 자산관리">총무 / 자산관리</option>
+                                            <option value="구매 / 자재관리">구매 / 자재관리</option>
+                                            <option value="재무 / 회계 / 세무">재무 / 회계 / 세무</option>
+                                            <option value="경영기획 / 경영지원">경영기획 / 경영지원</option>
+                                            <option value="마케팅 / 홍보 / PR">마케팅 / 홍보 / PR</option>
+                                        </optgroup>
+                                    </select>
+                                </div>
+
+                                <!-- Target Requirements -->
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold"><i class="bi bi-person-check me-1"></i>면접관 요구 스펙/스킬/인성 조건</label>
+                                    <textarea class="form-select" id="targetRequirements" rows="2" placeholder="예: Python, Fast API 숙련자, 대용량 트래픽 경험, 인사 노무법 이해자 우대..." style="height: auto; font-size: 0.9rem;"></textarea>
+                                </div>
+
+                                <!-- File Upload -->
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold"><i class="bi bi-paperclip me-1"></i>이력서/포트폴리오 파일 첨부 (PDF/TXT)</label>
+                                    <div class="file-drop-area" onclick="document.getElementById('fileInput').click()">
+                                        <i class="bi bi-cloud-arrow-up display-6 text-primary mb-1 d-block"></i>
+                                        <span class="small text-secondary" id="fileNameDisplay">클릭하여 파일 업로드 (PDF, TXT)</span>
+                                        <input type="file" id="fileInput" accept=".pdf, .txt" class="d-none" onchange="handleFileUpload(event)">
+                                    </div>
+                                </div>
+
+                                <!-- Resume Text -->
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold"><i class="bi bi-file-text me-1"></i>이력서 및 포트폴리오 텍스트</label>
+                                    <textarea class="form-select" id="resumeText" rows="6" placeholder="지원자의 이력서, 경력기술서, 프로젝트 설명을 입력하세요..." style="height: auto; font-size: 0.9rem;" required></textarea>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-est w-100 mt-2" id="analyzeBtn">
+                                <i class="bi bi-magic me-2"></i>이력서 정밀 검증 및 맞춤 질문 매칭
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side Results -->
+            <div class="col-xl-7 col-lg-6 d-flex flex-column">
+                
+                <!-- Loading Card -->
+                <div class="card flex-fill d-none" id="loadingCard">
+                    <div class="card-body d-flex flex-column align-items-center justify-content-center py-5">
+                        <div class="spinner-border text-primary mb-3" role="status" style="width: 3.5rem; height: 3.5rem;"></div>
+                        <h5 class="fw-bold">서류 검증 및 직군별 30+ 기출 DB 검색 중...</h5>
+                        <p class="text-muted small">독취사, 취업카페 족보 데이터를 기반으로 입력 텍스트를 정밀 대조합니다.</p>
+                    </div>
+                </div>
+
+                <!-- Placeholder Card -->
+                <div class="card flex-fill" id="placeholderCard">
+                    <div class="card-body d-flex flex-column align-items-center justify-content-center text-center py-5 text-muted">
+                        <i class="bi bi-clipboard2-check display-3 mb-3 text-secondary opacity-50"></i>
+                        <h5 class="fw-bold">좌측에 이력 정보를 입력해 주세요.</h5>
+                        <p class="small mb-0">불성실한 작성 내용이나 무의미한 문장은 자동으로 페널티(F등급 감점) 처리됩니다.</p>
+                    </div>
+                </div>
+
+                <!-- Result Area -->
+                <div id="resultArea" class="d-none flex-fill d-flex flex-column gap-3">
+                    
+                    <!-- AI Detector Box -->
+                    <div class="ai-detector-box d-flex align-items-center justify-content-between" id="aiDetectorAlert">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-robot fs-4" id="aiIcon"></i>
+                            <div>
+                                <strong class="d-block" id="aiDetectTitle">AI 에이전트 활용 및 서류 정밀 분석</strong>
+                                <span class="small text-dark" id="aiDetectDesc">-</span>
+                            </div>
+                        </div>
+                        <span class="badge px-3 py-2" id="aiDetectBadge">-</span>
+                    </div>
+
+                    <!-- Job Match Report -->
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-graph-up-arrow me-2"></i>직무 적합도 및 서류 검증 보고서</span>
+                            <span class="badge fs-6" id="matchScoreBadge">적합도: -</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center mb-3">
+                                <div class="col-4 border-end">
+                                    <span class="d-block text-muted small">요구 스펙 부합도</span>
+                                    <strong class="fs-4 text-primary" id="scoreSpec">-</strong>
+                                </div>
+                                <div class="col-4 border-end">
+                                    <span class="d-block text-muted small">실무 역량 깊이</span>
+                                    <strong class="fs-4 text-primary" id="scoreSkill">-</strong>
+                                </div>
+                                <div class="col-4">
+                                    <span class="d-block text-muted small">서류 성실도/신뢰성</span>
+                                    <strong class="fs-4 text-primary" id="scoreFit">-</strong>
+                                </div>
+                            </div>
+                            <p class="text-secondary small mb-0" id="summaryAnalysisText">-</p>
+                            <div class="warning-text-box d-none" id="warningBox">
+                                <i class="bi bi-exclamation-octagon-fill me-1"></i><strong>지적 및 감점 사유:</strong> <span id="warningMsg"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Question List Card -->
+                    <div class="card flex-fill">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-patch-question me-2"></i>직군별 30+ 기출 DB 동적 조합 질문 (총 6문항)</span>
+                            <span class="badge bg-secondary">실시간 동적 파싱 완료</span>
+                        </div>
+                        <div class="card-body" id="questionListArea">
+                            <!-- Questions inserted here -->
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="d-flex flex-wrap justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-3">
+            <span class="footer-logo">
+                EST <span class="t9-badge">T9</span>
+            </span>
+            <span>© 2026 ESTsoft Corp. & T9 Group. All rights reserved.</span>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-envelope-fill text-primary"></i>
+            <span>시스템 및 채용검증 문의: <a href="mailto:dotol9u@gmail.com" class="text-white text-decoration-underline">dotol9u@gmail.com</a></span>
+        </div>
+    </footer>
+</div>
+
+<script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
+    // 📚 직군당 최소 30개 이상의 기출/심층 질문 풀 (Light 10+, Work 10+, Deep 10+ = 직군당 30+)
     const QUESTION_DATABASE = {
         "AI / LLM 연구/개발자": {
             light: [
-                "최근에 접하신 [{skill}] 관련 연구/논문 중 가장 인상 깊었던 핵심 알고리즘과 한계점은 무엇이었나요?",
-                "새로운 프레임워크나 [{skill}] 도구가 출시되었을 때 빠르게 학습하고 실무에 적용하는 본인만의 노하우가 있나요?",
-                "AI 개발자로서 코드 품질(Clean Code)과 실험 속도 중 어떤 가치를 우선시하며 [{skill}] 프로젝트를 진행하시나요?"
+                "최근 읽으신 [{skill}] 관련 논문이나 연구 중 가장 인상 깊었던 핵심 알고리즘 아이디어는 무엇인가요?",
+                "새로운 [{skill}] 오픈소스 모델이나 프레임워크가 출시되었을 때 빠르게 습득하는 본인만의 학습 루틴이 있나요?",
+                "AI 연구자/개발자로서 실험 속도와 코드 재현성(Reproducibility) 중 어떤 부분에 더 중점을 두시나요?",
+                "[{skill}] 관련 프로젝트 수행 시 팀원들과 기술적 아이디어를 공유하고 다듬었던 소통 방식은 무엇이었나요?",
+                "최신 AI 기술 트렌드를 팔로우하기 위해 주로 활용하시는 아티클, 논문 플랫폼, 또는 커뮤니티는 어디인가요?",
+                "본인이 생각하는 생성형 AI 서비스의 가장 핵심적인 가치와 차별화 요소는 무엇이라고 보시나요?",
+                "[{skill}] 기반 작업을 수행할 때 오픈소스 모델과 상용 API(OpenAI 등) 중 선택하는 본인만의 기준은 무엇인가요?",
+                "생소한 새 알고리즘을 도입할 때 개발 팀 내에서 설득하고 적용했던 경험이 있으신가요?",
+                "AI 개발 도구(Copilot, Cursor 등)를 본인의 개발 생산성 향상에 어디까지 적극적으로 활용해 보셨나요?",
+                "이스트소프트의 AI 서비스 영역 중 지원자님의 [{skill}] 역량이 가장 잘 발휘될 분야는 어디라고 생각하시나요?"
             ],
             work: [
-                "작성해주신 서류 중 {metric} 대목과 관련하여, [{skill}] 파인튜닝/RAG 구축 시 환각(Hallucination) 현상을 극복한 실무 경험이 있나요?",
-                "[{skill}] 모델 서빙 및 Vector DB 구축 과정에서 Latency(응답속도) 최적화를 위해 시도했던 기법은 무엇이었나요?",
-                "데이터셋에 노이즈가 심했을 때, [{skill}] 모델 성능을 끌어올리기 위해 진행한 데이터 전처리 및 필터링 노하우를 설명해 주세요."
+                "작성해주신 서류 중 {metric} 대목과 관련하여, [{skill}] 파인튜닝 시 환각(Hallucination) 현상을 억제한 실무 노하우는 무엇인가요?",
+                "[{skill}] 기반 RAG(검색 증강 생성) 아키텍처 구축 시 Vector DB 선택 기준과 인덱싱 최적화 전략은 무엇이었나요?",
+                "[{skill}] 모델 경량화(Quantization, LoRA, QLoRA 등) 기법을 실제 서빙 환경에 적용해 본 경험이 있으신가요?",
+                "데이터셋 구축 과정에서 라벨링 노이즈를 필터링하고 데이터 전처리를 자동화했던 프로세스를 설명해 주세요.",
+                "[{skill}] 기반 AI 서비스의 평가 지표(BLEU, ROUGE, G-Eval 등)를 어떻게 정립하여 성능을 객관적으로 측정했나요?",
+                "[면접관 요구조건: {req}] 항목과 관련하여, 기존 [{skill}] 경험에서 얻은 인사이트를 어떻게 적용할 수 있나요?",
+                "Multi-GPU 환경에서 [{skill}] 모델 분산 학습(DeepSpeed, FSDP 등) 진행 시 발생한 병목을 해결한 경험이 있나요?",
+                "Prompt Engineering 기법(Few-shot, CoT 등)을 활용하여 LLM 출력을 정형화 및 구조화했던 사례를 공유해 주세요.",
+                "[{skill}] 파이프라인 구축 시 데이터 수집부터 모델 배포까지의 CI/CD 구축 경험이 있으신가요?",
+                "서류에 기재된 {metric} 결과 달성에 있어 지원자님 본인만의 독창적인 모듈/로직 설계 기여도는 어느 정도였나요?"
             ],
             deep: [
-                "[{skill}] 프로젝트 수행 중 발생했던 가장 치명적인 성능 병목이나 GPU 메모리 OOM 오류를 해결했던 트러블슈팅 과정을 설명해 주세요.",
-                "제출하신 포트폴리오 결과물 중 [{skill}] 구현 시 ChatGPT/LLM 등 자동화 도구의 도움을 받은 비중과 본인만의 독창적 설계 부분은 각각 어디인가요?"
+                "[{skill}] 모델 서빙 중 Latency와 Throughput 사이의 트레이드오프를 해결하기 위해 어떤 엔진(vLLM, TensorRT-LLM)을 활용하셨나요?",
+                "모델 학습 과정에서 Loss가 Explosion 되거나 학습이 멈췄을 때 원인을 추적하고 수습했던 경험을 설명해 주세요.",
+                "[{skill}] 모델에 대한 악의적인 프롬프트 인젝션(Prompt Injection)이나 보안 유출 시도에 어떻게 대비하셨나요?",
+                "제한된 인프라 환경에서 [{skill}] 모델 서빙 수용량을 극대화하기 위해 적용했던 메모리 관리 기법은 무엇인가요?",
+                "포트폴리오 프로젝트 중 [{skill}] 모듈 설계 시 발생한 예기치 못한 라이브러리 버그나 호환성 문제를 극복한 과정은 어떠했나요?",
+                "[{skill}] 알고리즘의 한계(비용, 속도, 정밀도)를 직접 느끼고 이를 커스텀 알고리즘 구현으로 극복한 적이 있나요?",
+                "AI 에이전트 구축 시 Multi-Agent 간 상태 관리(State Management) 및 도구 호출 실패 시 예외 처리 로직은 어떠했나요?",
+                "[{skill}] 관련 과제 수행 시 비즈니스 요구사항과 기술적 한계 사이에서 발생했던 타협과 의사결정 과정을 설명해 주세요.",
+                "이전 프로젝트의 [{skill}] 코드 아키텍처에서 가장 아쉬웠던 점과, 다시 작성한다면 어떻게 개선할 것인지 말씀해 주세요.",
+                "포트폴리오 내 작성 내용 중 ChatGPT 등 외부 AI 도구의 구체적 도움 범위와 본인의 유니크한 로직을 구분하여 설명해 주세요."
             ]
         },
         "백엔드 / SW 개발자": {
             light: [
                 "이력서에 기재해 주신 [{skill}] 기술을 중심으로 백엔드 개발자로서 성장하게 된 계기는 무엇인가요?",
-                "동료 개발자와 코드 리뷰(Code Review) 진행 중 [{skill}] 관련 설계 방식에 의견 충돌이 발생하면 어떻게 조율하시나요?",
-                "[{skill}] 환경에서 아키텍처를 설계할 때 모놀리식과 MSA 중 상황에 따라 판단하는 기준은 무엇인가요?"
+                "동료 개발자와 코드 리뷰(Code Review) 진행 중 [{skill}] 설계 방식에 의견 충돌이 발생하면 어떻게 조율하시나요?",
+                "[{skill}] 환경에서 아키텍처를 설계할 때 모놀리식과 MSA 중 상황에 따라 판단하는 본인만의 기준은 무엇인가요?",
+                "개발자로서 코드의 가독성(Clean Code)과 촉박한 데드라인 속 개발 속도 중 어느 쪽에 더 비중을 두시나요?",
+                "새로운 백엔드 프레임워크나 오픈소스를 도입할 때 안정성 검증을 위해 어떤 절차를 거치시나요?",
+                "팀 프로젝트 시 API 명세서 작성 및 스웨거(Swagger) 등을 활용한 서블릿 간 협업 노하우는 무엇인가요?",
+                "[{skill}] 개발 시 TDD(테스트 주도 개발)나 단위 테스트 코드 작성을 어느 정도 비중으로 실천하고 계신가요?",
+                "백엔드 엔지니어로서 평소 기술 블로그 작성이나 오픈소스 기여 등 지속적인 성장을 위해 하고 계신 노력은 무엇인가요?",
+                "이스트소프트의 대용량 서비스 환경에서 본인의 [{skill}] 역량이 어떻게 기여할 수 있다고 생각하시나요?",
+                "이전 프로젝트에서 백엔드 개발을 진행하며 가장 보람을 느꼈던 기술적 달성 순간은 언제였나요?"
             ],
             work: [
                 "서류상의 {metric} 성과와 관련하여, [{skill}] 기반의 대용량 트래픽 처리나 DB 인덱스 튜닝 시 직접 수행한 역할은 무엇이었나요?",
                 "RESTful API 설계 시 자원 명명 규칙과 [{skill}] 예외 처리(Exception Handling)를 공통화하여 생산성을 높인 경험을 말씀해 주세요.",
-                "[{skill}] 시스템에서 캐시 레이어(Redis 등)나 비동기 큐(Kafka/RabbitMQ)를 도입하여 성능을 개선한 사례가 있나요?"
+                "[{skill}] 시스템에서 캐시 레이어(Redis 등)나 비동기 큐(Kafka/RabbitMQ)를 도입하여 성능을 개선한 사례가 있나요?",
+                "RDBMS 사용 시 N+1 문제나 느린 쿼리(Slow Query)가 발생했을 때 이를 감지하고 쿼리를 최적화한 절차를 설명해 주세요.",
+                "[면접관 요구조건: {req}] 항목과 관련하여, 기존 [{skill}] 경험을 바탕으로 입사 후 빠르게 구현할 수 있는 영역은 어디인가요?",
+                "[{skill}] 기반 서버 배포 시 Docker, Kubernetes 및 CI/CD 파이프라인을 직접 구성해 본 경험이 있으신가요?",
+                "데이터베이스 트랜잭션 격리 수준(Isolation Level) 설정 오류로 인해 발생할 수 있는 데이터 부정합 문제를 해결한 적이 있나요?",
+                "대용량 데이터 조회 시 페이징 처리나 쿼리 오프셋 최적화를 통해 서버 부하를 줄인 노하우를 공유해 주세요.",
+                "[{skill}] 개발 과정에서 외부 제3자 API 연동 시 장애 연쇄 반응을 막기 위해 서킷 브레이커 등을 적용해 본 적이 있나요?",
+                "기재해주신 {metric} 대목의 성능 향상치 측정 기준과, 이를 검증하기 위해 사용한 APM/부하 테스트 도구는 무엇이었나요?"
             ],
             deep: [
-                "[{skill}] 활용 중 트랜잭션 격리 수준이나 스레드 동시성 문제로 장애가 발생했던 경험과 이를 해결한 구체적 로직을 설명해 주세요.",
-                "제출하신 결과물 중 [{skill}] 코드 작성 시 Copilot/ChatGPT 등 AI 도구를 사용한 범위와 본인이 직접 쿼리/로직을 설계한 부분을 구별하여 설명해 주세요."
+                "[{skill}] 활용 중 트랜잭션 동시성 문제(Deadlock, Race Condition)로 장애가 발생했던 경험과 이를 해결한 구체적 로직을 설명해 주세요.",
+                "서버 다운이나 DB Connection Pool 방전 등 치명적인 장애 상황을 모니터링하고 가용성을 복구했던 트러블슈팅 경험을 말씀해 주세요.",
+                "[{skill}] 코드베이스의 분량이 커짐에 따라 리팩토링을 단행했던 경험과, 이로 인한 객체지향적 이점은 무엇이었나요?",
+                "분산 환경에서 데이터 일관성을 유지하기 위해 SAGA 패턴이나 2단계 커밋 등을 고민하거나 적용해 본 적이 있나요?",
+                "포트폴리오 작성 코드 중 [{skill}] 보안 취약점(SQL Injection, XSS, CSRF 등)에 대비해 어떤 방어 로직을 구현하셨나요?",
+                "메모리 누수(Memory Leak)나 GC(Garbage Collection) 스탑더월드로 인한 지연 발생 시 프로파일링 도구로 원인을 규명한 과정은 어떠했나요?",
+                "[{skill}] 백엔드 아키텍처 설계 중 본인의 판단 착오로 발생했던 기술 부채와 이를 수습했던 교훈을 솔직히 공유해 주세요.",
+                "레거시 코드 시스템을 최신 [{skill}] 버전으로 마이그레이션하는 과정에서 서비스 중단 없이 완수한 경험이 있으신가요?",
+                "제출하신 결과물 중 Copilot/ChatGPT 등 AI 도구를 사용한 범위와 본인이 직접 쿼리 및 코어 로직을 설계한 부분을 구별하여 설명해 주세요.",
+                "백엔드 시스템 구축 시 기술적 한계나 비용 문제로 원래 계획을 변경해야 했던 의사결정 사례를 말씀해 주세요."
+            ]
+        },
+        "보안 S/W 엔지니어 (알약)": {
+            light: [
+                "최근 발생한 주요 보안 취약점(Zero-day)이나 악성코드 트렌드 중 가장 주시하고 계신 이슈는 무엇인가요?",
+                "보안 제품(알약 등) 개발 시 사용자 편의성과 강력한 보안성 사이의 균형을 맞추는 본인만의 기준은 무엇인가요?",
+                "[{skill}] 기반 보안 프로그램 개발자로서 지녀야 할 가장 핵심적인 윤리의식과 자질은 무엇이라고 생각하시나요?",
+                "새로운 보안 도구나 분석 방법론이 등장했을 때 이를 개인 연구나 업무에 적용하는 방식은 어떠한가요?",
+                "보안 이슈 발생 시 개발 팀 내부 및 타 부서와 신속하게 상황을 공유하고 협업하는 본인만의 노하우가 있나요?",
+                "알약(ALYac)과 같은 국민 보안 소프트웨어 개발에 참여한다는 것에 대해 어떤 마음가짐을 가지고 계신가요?",
+                "[{skill}] 관련 보안 분석/개발 작업을 진행하며 가장 재미를 느꼈던 순간은 언제였나요?",
+                "평소 CVE 취약점 리포트나 보안 컨퍼런스 자료를 분석하며 개인적인 역량 강화를 위해 하시는 활동은 무엇인가요?",
+                "[{skill}] 도구를 활용한 악성코드 분석 과정에서 가장 오랫동안 고민했던 과제는 무엇이었나요?",
+                "이스트소프트 보안 제품군의 경쟁력을 높이기 위해 추가하고 싶은 본인만의 아이디어가 있으신가요?"
+            ],
+            work: [
+                "Windows/Linux 환경에서 커널 단 리버스 엔지니어링이나 [{skill}] 기반 악성코드 동적/정적 분석 경험을 설명해 주세요.",
+                "백신 탐지 엔진의 오탐(False Positive) 비율을 줄이고 탐지 정확도를 높이기 위해 적용한 검증 프로세스는 무엇인가요?",
+                "[{skill}] 활용 모의해킹이나 취약점 진단 시 사용한 자동화 스크립트 작성 및 탐지 룰(YARA 등) 제작 경험을 말씀해 주세요.",
+                "서류상의 {metric} 성과와 관련하여, 보안 엔지니어로서 직접 악성 행위를 차단하거나 탐지 알고리즘을 개선한 역할은 무엇이었나요?",
+                "[면접관 요구조건: {req}] 항목과 관련하여, 보안 SW 제품 개발 시 즉시 적용할 수 있는 지원자님의 강점은 무엇인가요?",
+                "시스템 드라이버 개발이나 Hooking 기술 적용 시 메모리 안정성을 확보하고 블루스크린(BSOD)을 예방한 경험이 있나요?",
+                "랜섬웨어의 파일 암호화 행위를 실시간 감지 및 차단하기 위한 행위 기반 탐지 아키텍처 구현 사례를 공유해 주세요.",
+                "[{skill}] 기반 네트워크 패킷 분석(Wireshark 등)을 통해 C&C 서버 통신을 차단하거나 세션을 탐지했던 경험이 있으신가요?",
+                "보안 제품의 리소스 점유율(CPU, RAM)을 최소화하기 위해 코드 최적화를 진행했던 실무 사례를 말씀해 주세요.",
+                "기재해주신 {metric} 대목의 보안 지표 개선을 위해 사용한 테스트 프레임워크나 자동화 체계는 무엇이었나요?"
+            ],
+            deep: [
+                "알려지지 않은 신종 악성코드(Unpacked/Obfuscated)의 난독화를 해제하고 패킹을 풀어낸 구체적인 과정과 도구를 설명해 주세요.",
+                "시스템 저한 커널 라이브러리와 직접 통신하는 보안 SW 개발 시 발생할 수 있는 레이스 조건이나 메모리 훼손 취약점 방어법은 무엇인가요?",
+                "보안 엔진 업데이터나 실시간 감시 모듈 개발 중 예기치 못한 OS 업데이트 호환성 오류를 극복했던 경험을 말씀해 주세요.",
+                "[{skill}] 보안 프로그램 자체가 타겟이 되어 드라이버 무력화 공격을 받거나 안티 리버싱이 필요할 때 어떻게 대비하셨나요?",
+                "취약점 PoC 코드를 분석하여 실시간 방어 패턴을 엔진에 반영하기까지의 타임라인 및 트러블슈팅 절차를 설명해 주세요.",
+                "보안 시스템 내 대용량 로그(Syslog, Event Log)를 실시간 분석할 때 발생한 데이터 부하를 수습했던 아키텍처는 무엇인가요?",
+                "지원자님의 보안 개발/분석 판단 미스로 인해 정상 프로그램이 차단되었던 비상 상황과 이를 수습한 경험을 공유해 주세요.",
+                "[{skill}] 기반 보안 솔루션 개발 중 타사 보안 프로그램과의 충돌 이슈를 분석하고 원인을 찾아 해결했던 사례가 있나요?",
+                "제출하신 포트폴리오 내용 중 AI 도구를 활용한 코드 작성 부분과 직접 분석한 리버스 엔지니어링 영역을 구별하여 설명해 주세요.",
+                "보안 SW 엔지니어로서 기술적 한계나 타협이 필요한 순간에 보안성을 포기하지 않고 설득해 낸 경험이 있으신가요?"
             ]
         },
         "인사 (HRM / HRD)": {
             light: [
-                "인사 담당자로서 [{skill}] 관련 업무를 수행할 때 구성원들과의 신뢰 형성 및 보안 유지를 위해 가장 중요하게 여기는 태도는 무엇인가요?",
+                "인사 담당자로서 [{skill}] 관련 업무 수행 시 구성원들과의 신뢰 형성 및 비밀보장을 위해 가장 중요하게 여기는 태도는 무엇인가요?",
                 "최근 채용 시장 트렌드 및 취업 커뮤니티(독취사, 블라인드 등) 내 회사 평판 관리에 대한 본인만의 견해가 있으신가요?",
-                "[{skill}] 조직 문화를 조성하는 과정에서 다양한 직군의 구성원들과 소통할 때 사용하는 본인만의 설득 방식은 무엇인가요?"
+                "[{skill}] 조직 문화를 조성하는 과정에서 다양한 직군의 구성원들과 소통할 때 사용하는 본인만의 설득 방식은 무엇인가요?",
+                "인사 직무를 선택하게 된 결정적인 계기와, 평소 인사 담당자로서 본받고 싶은 리더십 모형은 무엇인가요?",
+                "급변하는 노무 환경 속에서 최신 근로기준법 개정안이나 인사 트렌드를 꾸준히 학습하는 본인만의 방법이 있나요?",
+                "채용 브랜딩이나 수시 채용 진행 시 지원자 경험(Candidate Experience)을 긍정적으로 만들기 위해 노력했던 점은 무엇인가요?",
+                "[{skill}] 관련 HR 제도를 기획할 때 회사(경영진)의 입장과 직원들의 니즈 사이에서 균형을 잡는 기준은 무엇인가요?",
+                "조직 내 다양한 갈등 상황을 중재하거나 구성원들의 고민을 경청할 때 발휘하는 본인만의 강점은 무엇인가요?",
+                "이스트소프트의 자율적이고 몰입하는 조직 문화에 본인의 [{skill}] 역량이 어떻게 기여할 수 있다고 생각하시나요?",
+                "인사 담당자로서 업무를 수행하며 가장 보람을 느꼈던 조직 변화의 순간은 언제였나요?"
             ],
             work: [
                 "서류 내용 중 {metric} 내용과 관련하여, [{skill}] 규정/제도 개정이나 노무 이슈 대응 시 직접 기여한 바는 무엇인가요?",
                 "직무 평가 및 연봉 협상/평가 운영 과정에서 불만을 가진 피평가자를 설득하고 수용도를 높인 실제 사례가 있나요?",
-                "[{skill}] 데이터(퇴사율, 만족도 등)를 기반으로 직접 기획하여 도입해 본 HR 프로그램이나 채용 프로세스 개선안이 있나요?"
+                "[{skill}] 데이터(퇴사율, 만족도, 채용 리드타임 등)를 기반으로 직접 기획하여 도입해 본 HR 프로그램이 있나요?",
+                "신규 입사자 온보딩(Onboarding) 프로그램을 기획하고 조기 안착율을 높였던 경험을 구체적으로 설명해 주세요.",
+                "[면접관 요구조건: {req}] 항목과 관련하여, 기존 [{skill}] 경험을 바탕으로 즉시 추진할 수 있는 HR 과제는 무엇인가요?",
+                "근로시간 관리, 연차 수당, 취업규칙 변경 등 실무 노무 이슈 발생 시 법적 리스크를 사전에 점검하고 대처했던 사례를 말씀해 주세요.",
+                "핵심 인재(Key Talent) 이탈을 방지하기 위해 Retention 기획을 수립하거나 보상 체계(PBP)를 개편해 본 적이 있나요?",
+                "[{skill}] 조직 문화 평가나 사내 만족도 조사를 설계하고 그 결과를 바탕으로 실질적인 조직 개선안을 이끌어낸 사례가 있나요?",
+                "직무 분석(Job Analysis) 및 직무 기술서 작성을 진행하여 채용 및 평가 시스템의 기준을 명확히 한 경험을 공유해 주세요.",
+                "기재해주신 {metric} 성과 달성 시 구성원들의 반발을 최소화하기 위해 사용한 Change Management 소통 전략은 무엇이었나요?"
             ],
             deep: [
-                "[{skill}] 관련 법적 이슈나 조직 개편 같은 무거운 의사결정 상황에서 비상 상황을 연착륙시킨 경험을 구체적으로 설명해 주세요.",
-                "제출하신 기획서/포트폴리오 작성 시 AI 생성 도구를 활용한 부분과 지원자 본인의 인사적 인사이트가 들어간 핵심 영역은 어디인가요?"
+                "[{skill}] 관련 법적 노무 분쟁이나 부당해고 진정 등 무거운 인사 이슈가 발생했을 때 연착륙시킨 경험을 구체적으로 설명해 주세요.",
+                "조직 개편이나 권고사직 등 비상 상황에서 경영진의 의도를 전달하면서도 직원들의 동요를 줄였던 진정성 있는 소통 사례가 있나요?",
+                "인사 평가 제도의 불공정성 논란이 불거졌을 때 기존 지표의 모순을 분석하고 평가 공정성을 회복시켰던 과정은 어떠했나요?",
+                "[{skill}] 기획안이 경영진 설득에 실패했을 때 원인을 분석하여 데이터 기반으로 재설득해 안건을 통과시킨 경험이 있나요?",
+                "급격한 조직 성장으로 인한 조직 문화 훼손(Culture Shock) 현상을 극복하기 위해 단행했던 인사적 수술은 무엇이었나요?",
+                "HRIS(인사정보시스템) 도입이나 평가 자동화 체계 구축 시 데이터 오류나 시스템 적응 거부감을 극복했던 프로세스를 말씀해 주세요.",
+                "본인의 인사 판단 오류로 인해 원하지 않는 퇴사자가 발생했거나 갈등이 심화되었던 실수를 솔직히 공유하고 얻은 레슨은 무엇인가요?",
+                "[{skill}] 관련 연봉 인상 재원(Merit Pool)이 제한적인 상황에서 합리적이고 차등적인 보상 배분을 완수한 노하우는 무엇인가요?",
+                "제출하신 기획서/포트폴리오 작성 시 AI 생성 도구를 활용한 부분과 지원자 본인의 인사적 인사이트가 들어간 핵심 영역은 어디인가요?",
+                "HR 담당자로서 최고경영진의 비전과 현업 팀장들의 현실적 불만 사이에서 갈등할 때 본인만의 솔로몬의 지혜는 무엇이었나요?"
             ]
         },
         "재무 / 회계 / 세무": {
             light: [
                 "숫자와 결산을 다루는 업무 특성상 [{skill}] 작업 시 발생할 수 있는 휴먼 에러를 방지하는 본인만의 3단계 점검 루틴이 있나요?",
-                "빡빡한 월/연말 결산 타임라인 속에서 [{skill}] 업무의 우선순위를 매기는 기준은 무엇인가요?"
+                "빡빡한 월/연말 결산 타임라인 속에서 [{skill}] 업무의 우선순위를 매기는 본인만의 기준은 무엇인가요?",
+                "재무/회계 담당자로서 지녀야 할 가장 중요한 덕목과 원칙주의적 태도는 무엇이라고 생각하시나요?",
+                "새로운 세법 개정안이나 회계기준(K-IFRS) 변경 사항을 지속적으로 업데이트하는 본인만의 학습 방법이 있나요?",
+                "타 부서에서 제출한 증빙이나 비용 처리서류에 오류가 많을 때 부드럽게 재요청하고 교육하는 소통 노하우가 있나요?",
+                "[{skill}] 프로그램(더존, SAP 등)을 사용할 때 업무 효율성을 극백화하기 위해 자주 사용하는 기능은 무엇인가요?",
+                "재무/회계 직무를 선택하게 된 계기와, 숫자를 분석하며 가장 큰 재미를 느끼는 순간은 언제인가요?",
+                "이스트소프트의 재무 건전성 및 효율적인 자금 관리를 위해 본인의 [{skill}] 역량이 어떻게 기여할 수 있을까요?",
+                "회계 감사인(회계법인)과의 수임 대응 시 원활한 의사소통을 위해 평소 준비해 두는 자료는 무엇인가요?",
+                "이전 직장에서 재무/회계 업무 프로세스를 단 10분이라도 줄여본 경험이나 아이디어가 있으신가요?"
             ],
             work: [
                 "기재해주신 {metric} 대목과 관련하여, [{skill}] 전표 처리 및 결산 차이 내역을 분석하고 감사 대응을 진행한 구체적 역할은 무엇이었나요?",
-                "법인세, 부가가치세 등 세무 신고 시 [{skill}] 관련 절세 방안을 검토하거나 세무 조사 리스크를 사전에 점검한 경험을 말씀해 주세요."
+                "법인세, 부가가치세 등 세무 신고 시 [{skill}] 관련 절세 방안을 검토하거나 세무 조사 리스크를 사전에 점검한 경험을 말씀해 주세요.",
+                "[{skill}] 자금 수지 계획 수립 및 현금 흐름 분석을 통해 회사의 자금 조달 및 운용 리스크를 사전에 예방한 사례가 있나요?",
+                "원가 계산 및 관리회계 관점에서 제품/서비스별 손익분기점(BEP)을 분석하여 경영진 보고를 수행했던 경험을 공유해 주세요.",
+                "[면접관 요구조건: {req}] 항목과 관련하여, 기존 [{skill}] 경험을 바탕으로 즉시 수행 가능한 회계/재무 과제는 무엇인가요?",
+                "월/분기 마감 시간을 단축하기 위해 회계 전표 입력 자동화나 엑셀 매크로/VBA를 활용해 본 경험이 있으신가요?",
+                "유무형 자산 관리, 퇴직연금 충당부채 계산, 외화 환산 등 까다로운 회계 처리 항목을 직접 수행했던 사례를 설명해 주세요.",
+                "[{skill}] 내부회계관리제도(K-SOX) 구축 또는 운영 실태 점검에 참여하여 통제 미비점을 개선했던 경험이 있으신가요?",
+                "부서별 예산 수립(Budgeting) 및 예실 차이 분석을 통해 불필요한 비용 지출을 통제했던 실무 노하우를 말씀해 주세요.",
+                "서류상의 {metric} 결과 달성을 위해 회계법인 감사인과의 의견 차이를 K-IFRS 기준서에 의거하여 논리적으로 설득한 적이 있나요?"
             ],
             deep: [
-                "ERP 시스템(더존, SAP 등) 및 [{skill}] 자동화 프로세스를 구축하여 결산 일수를 단축하거나 비용을 절감한 사례를 설명해 주세요.",
-                "재무제표 분석 중 이상 징후나 자금 현금흐름의 리스크를 발견하여 수습했던 경험에 대해 구체적으로 말씀해 주세요."
+                "ERP 시스템 도입이나 회계 시스템 고도화 과정에서 데이터 마이그레이션 오류를 잡아내고 안정화시켰던 경험을 설명해 주세요.",
+                "재무제표 분석 중 우발채무나 회수 불가능한 대손충당금 등 잠재적 재무 리스크를 찾아내어 사전 조치했던 사례가 있나요?",
+                "세무서로부터 과세예고통지나 세무조사 자료 제출 요구를 받았을 때 세법 근거를 제시하여 성공적으로 소명했던 경험을 공유해 주세요.",
+                "[{skill}] 자금 집행 과정에서 발생할 수 있는 횡령이나 부정 위험을 방지하기 위해 내부 통제 프로세스를 개편했던 사례가 있나요?",
+                "결산 마감 기한이 임박했으나 타 부서의 데이터 제출 지연으로 차질이 생겼을 때 비상 수습했던 경험을 말씀해 주세요.",
+                "본인의 자금 수지 예측 오류나 회계 전표 오류로 인해 발생했던 자금 차질을 솔직히 보고하고 바로잡았던 과오와 레슨은 무엇인가요?",
+                "[{skill}] 관련 해외 법인 회계 통합이나 환율 변동성 리스크(FX Risk)를 헤지하기 위해 수립했던 자금 전략은 무엇이었나요?",
+                "사업부별 비용 배부 기준(Cost Allocation)을 두고 사업부장들 간 갈등이 심했을 때 합리적인 기준을 세워 설득했던 노하우를 공유해 주세요.",
+                "제출하신 서류 작성 시 ChatGPT/엑셀 자동화 도구의 도움을 받은 범위와 본인의 세무/회계적 판단이 반영된 영역을 구별하여 설명해 주세요.",
+                "CFO 및 경영진의 불가능한 비용 절감 요구나 회계적 요구에 대응하여 원칙을 지키면서도 현실적인 대안을 제시했던 경험이 있나요?"
             ]
         },
         "DEFAULT": {
             light: [
                 "이력서에 기재해 주신 [{skill}] 관련 핵심 경험을 바탕으로 해당 직무에 지원하게 된 계기는 무엇인가요?",
-                "팀원들과 협업할 때 [{skill}] 역량을 활용하여 주로 담당하는 성향(주도형, 지원형, 중재형)은 무엇인가요?"
+                "팀원들과 협업할 때 [{skill}] 역량을 활용하여 주로 담당하는 역할(주도형, 지원형, 중재형)은 무엇인가요?",
+                "해당 직무에서 가장 중요하게 생각하는 핵심 역량은 무엇이며, 이를 위해 최근 1년간 노력한 부분은 무엇인가요?",
+                "새로운 도구나 업무 시스템을 도입해야 할 때 빠르게 적응하는 본인만의 노하우가 있나요?",
+                "업무 중 예상치 못한 우선순위 변경이 발생했을 때 이를 유연하게 조정하는 기준은 무엇인가요?",
+                "이스트소프트의 기업 문화와 비전에 대해 어떻게 이해하고 계시며, 본인이 어떻게 부합한다고 생각하시나요?",
+                "[{skill}] 관련 과제를 수행하면서 가장 보람을 느꼈던 대표적인 성과 경험은 무엇이었나요?",
+                "동료와 업무 추진 방식에 시각차가 생겼을 때 이를 타협하고 건설적인 결과로 이끌어낸 사례가 있나요?",
+                "평소 본인의 스트레스 관리 방식과 업무 몰입도를 유지하는 루틴은 무엇인가요?",
+                "입사 후 3년 내에 이 직무에서 달성하고 싶은 구체적인 목표와 성장의 모습은 무엇인가요?"
             ],
             work: [
                 "서류의 {metric} 성과 달성 과정에서 지원자 본인의 직접적인 기여도(%)와 주요 역할은 무엇이었나요?",
-                "[{skill}] 활용 업무 진행 중 목표치 대비 성과가 미진했을 때 원인을 분석하고 개선안을 제시하여 반전시킨 사례가 있나요?"
+                "[{skill}] 활용 업무 진행 중 목표치 대비 성과가 미진했을 때 원인을 분석하고 개선안을 제시하여 반전시킨 사례가 있나요?",
+                "[면접관 요구조건: {req}] 해당 조건과 관련하여, 본인이 입사 후 가장 빠르게 성과를 낼 수 있는 영역은 어디인가요?",
+                "기존의 비효율적이었던 프로세스를 본인의 아이디어로 자동화하거나 개선하여 생산성을 극대화한 경험이 있나요?",
+                "타 부서와의 협업 프로젝트 시 이해관계가 대립되었을 때 데이터나 논리로 설득해 낸 사례를 공유해 주세요.",
+                "[{skill}] 업무 수행 중 주어진 리소스(예산, 인력, 시간)가 부족할 때 이를 극복하고 완료했던 경험을 말씀해 주세요.",
+                "업무 품질을 유지하기 위해 자신만의 과업 점검 리스트나 표준 운영 절차(SOP)를 만들어 활용해 본 적이 있나요?",
+                "기재해주신 {metric} 대목의 수치를 도출하기 위해 사용한 분석 방법론이나 데이터 도구는 무엇이었나요?",
+                "[{skill}] 도구나 매뉴얼을 팀 내에 새로 전파하고 교육하여 팀 전체의 역량을 올렸던 사례가 있나요?",
+                "새로운 과제를 맡았을 때 시장 조사 및 경쟁사 분석을 통해 인사이트를 도출해 낸 프로세스를 설명해 주세요."
             ],
             deep: [
                 "[{skill}] 관련 예기치 못한 비상 상황이나 실수가 발생했을 때 이를 솔직하게 보고하고 수습했던 구체적 프로세스를 설명해 주세요.",
-                "제출하신 서류 작성 시 ChatGPT 등 AI 자동화 도구의 도움을 받은 비중과 본인만의 아이디어가 반영된 영역을 구별하여 설명해 주세요."
+                "업무 진행 중 본인의 주장이 틀렸음을 깨달았을 때 이를 솔직히 인정하고 방향을 선회했던 경험을 공유해 주세요.",
+                "프로젝트 진행 중 심각한 일정 지연이나 목표 변경 압박이 들어왔을 때 과업 범위를 조정하고 완료시켰던 의사결정 사례는 무엇인가요?",
+                "[{skill}] 관련 업무를 수행하며 경험했던 가장 치명적인 문제 상황과, 이를 해결하기 위해 원인을 파헤쳤던 과정을 말씀해 주세요.",
+                "상사나 동료의 비합리적인 요구나 지시가 있었을 때 원칙을 지키면서도 현명하게 대처했던 경험이 있으신가요?",
+                "기대를 안고 추진했던 프로젝트가 실패로 끝났을 때 이를 통해 얻은 레슨과 이후 업무 개선에 적용한 사례는 무엇인가요?",
+                "제출하신 포트폴리오/서류 작성 시 ChatGPT 등 AI 자동화 도구의 도움을 받은 비중과 본인만의 아이디어가 반영된 영역을 구별하여 설명해 주세요.",
+                "[{skill}] 시스템이나 업무 아키텍처를 처음부터 끝까지 혼자 힘으로 구축해 본 경험과 그때 느낀 한계점은 무엇이었나요?",
+                "여러 과업이 동시에 터졌을 때 멀티태스킹을 하면서도 펑크를 내지 않고 수습했던 본인만의 우선순위 관리 공식은 무엇인가요?",
+                "이 직무를 수행하면서 부딪힐 수 있는 가장 큰 기술적/비즈니스적 장벽은 무엇이라고 생각하며 이를 어떻게 넘어설 것인가요?"
             ]
         }
     };
@@ -129,43 +624,43 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs
         }, 1000);
     });
 
-    // 🔍 실시간 키워드 추출 & 동적 질문 조합 알고리즘
+    // 🔍 실시간 서류 검증 및 30+ DB 동적 매칭 알고리즘
     function validateAndAnalyze(position, requirements, resume) {
         const cleanResume = resume.trim();
         const warningBox = document.getElementById('warningBox');
         const warningMsg = document.getElementById('warningMsg');
 
-        // 1. 불량 서류 감지 검사
+        // 1. 불량/장난성 서류 정밀 감지 검사
         let penaltyCount = 0;
         let warningReasons = [];
 
         if (cleanResume.length < 80) {
-            penaltyCount += 50;
-            warningReasons.push("이력서 분량이 너무 적습니다 (80자 미만).");
+            penaltyCount += 55;
+            warningReasons.push("이력서 분량이 현저히 부족합니다 (80자 미만 제출).");
         }
 
-        if (/(.)\1{4,}/.test(cleanResume) || /asdf|test|ㅋㅋㅋ|ㅎㅎㅎ|개소리|아무거나|입력하기싫음/i.test(cleanResume)) {
-            penaltyCount += 45;
-            warningReasons.push("장난스러운 문자 반복이나 의미 없는 무성의 단어가 포함되어 있습니다.");
+        if (/(.)\1{4,}/.test(cleanResume) || /asdf|test|ㅋㅋㅋ|ㅎㅎㅎ|개소리|아무거나|입력하기싫음|테스트|지껄/i.test(cleanResume)) {
+            penaltyCount += 50;
+            warningReasons.push("장난스러운 문자 반복이나 의미 없는 무성의 단어(장난성 서류)가 포함되어 있습니다.");
         }
 
         const jobKeywords = {
-            "AI / LLM 연구/개발자": ["ai", "llm", "모델", "python", "데이터", "논문", "학습", "pytorch", "rag", "transformer", "파인튜닝"],
-            "백엔드 / SW 개발자": ["백엔드", "java", "python", "spring", "api", "db", "서버", "개발", "트래픽", "쿼리", "mysql"],
-            "보안 S/W 엔지니어 (알약)": ["보안", "백신", "악성코드", "취약점", "c++", "커널", "분석", "엔진", "알약", "네트워크"],
-            "인사 (HRM / HRD)": ["인사", "채용", "hr", "노무", "평가", "교육", "근로기준법", "급여", "조직", "연봉"],
-            "재무 / 회계 / 세무": ["회계", "세무", "결산", "전표", "세금", "재무", "감사", "erp", "부가가치세", "원천세"]
+            "AI / LLM 연구/개발자": ["ai", "llm", "모델", "python", "데이터", "논문", "학습", "pytorch", "rag", "transformer", "파인튜닝", "gpu"],
+            "백엔드 / SW 개발자": ["백엔드", "java", "python", "spring", "api", "db", "서버", "개발", "트래픽", "쿼리", "mysql", "redis"],
+            "보안 S/W 엔지니어 (알약)": ["보안", "백신", "악성코드", "취약점", "c++", "커널", "분석", "엔진", "알약", "네트워크", "리버스"],
+            "인사 (HRM / HRD)": ["인사", "채용", "hr", "노무", "평가", "교육", "근로기준법", "급여", "조직", "연봉", "노무법"],
+            "재무 / 회계 / 세무": ["회계", "세무", "결산", "전표", "세금", "재무", "감사", "erp", "부가가치세", "원천세", "k-ifrs"]
         };
 
-        const targetKeys = jobKeywords[position] || ["경험", "업무", "역량", "프로젝트"];
+        const targetKeys = jobKeywords[position] || ["경험", "업무", "역량", "프로젝트", "기획", "마케팅"];
         const matchedKeys = targetKeys.filter(k => cleanResume.toLowerCase().includes(k));
 
         if (matchedKeys.length === 0) {
-            penaltyCount += 35;
-            warningReasons.push(`선택하신 [${position}] 직무 관련 전문 키워드가 단 하나도 없습니다.`);
+            penaltyCount += 40;
+            warningReasons.push(`선택하신 [${position}] 직무와 연관된 기초 전문 용어/키워드가 단 하나도 감지되지 않았습니다.`);
         }
 
-        // 2. 점수 및 적합도 판정
+        // 2. 적합도 점수 산출 및 F등급 지적 처리
         let finalScore = Math.max(10, 95 - penaltyCount);
 
         const matchScoreBadge = document.getElementById('matchScoreBadge');
@@ -181,7 +676,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs
             skillEl.innerText = "F"; skillEl.className = "fs-4 text-danger";
             fitEl.innerText = "F"; fitEl.className = "fs-4 text-danger";
 
-            summaryEl.innerText = `[서류 검증 실패] 제출된 서류는 [${position}] 직군의 정상적인 이력서로 보기 어렵습니다. 내용이 무성의하거나 직무 연관성이 없어 면접 진행이 불가능합니다.`;
+            summaryEl.innerText = `[서류 검증 실패] 제출된 서류는 [${position}] 직군의 정상적인 이력서로 볼 수 없습니다. 내용이 불성실하거나 직무 연관성이 없어 면접 진행이 불가능합니다.`;
             warningBox.classList.remove('d-none');
             warningMsg.innerText = warningReasons.join(' / ');
         } else {
@@ -192,11 +687,11 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs
             fitEl.innerText = "B+"; fitEl.className = "fs-4 text-primary";
 
             const reqText = requirements ? requirements.trim() : "해당 직무 요구조건";
-            summaryEl.innerText = `지원자의 서류 검증이 완료되었습니다. 감지된 핵심 키워드(${matchedKeys.join(', ')}) 및 요구조건("${reqText}")을 추출하여 개별 맞춤 질문 세트를 조합했습니다.`;
+            summaryEl.innerText = `지원자의 서류 검증이 정상적으로 완료되었습니다. 감지된 핵심 키워드(${matchedKeys.join(', ')}) 및 요구조건("${reqText}")을 바탕으로 30+ 기출 DB에서 개별 맞춤 질문을 조합했습니다.`;
             warningBox.classList.add('d-none');
         }
 
-        // 3. AI 작성 감지
+        // 3. AI 에이전트 활용 여부 판별
         const badge = document.getElementById('aiDetectBadge');
         const title = document.getElementById('aiDetectTitle');
         const desc = document.getElementById('aiDetectDesc');
@@ -206,13 +701,13 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs
             badge.className = "badge bg-danger px-3 py-2";
             badge.innerText = "AI 작성 감지 (78%)";
             title.innerText = "AI 에이전트 활용 작성 가능성 감지";
-            desc.innerText = "정형화된 대량 서술 패턴이 포착되었습니다. 실제 본인 수행 여부를 검증하세요.";
+            desc.innerText = "정형화된 대량 서술 패턴이 포착되었습니다. 실제 본인 수행 여부를 심층 검증하세요.";
             icon.className = "bi bi-robot fs-4 text-warning";
         } else if (penaltyCount >= 40) {
             badge.className = "badge bg-secondary px-3 py-2";
             badge.innerText = "검증 불가";
             title.innerText = "부적격 서류 제출됨";
-            desc.innerText = "불성실 서류 제출로 AI 감지 분석 대상이 아닙니다.";
+            desc.innerText = "불성실 서류 제출로 AI 감지 분석 의미가 없습니다.";
             icon.className = "bi bi-exclamation-triangle-fill fs-4 text-danger";
         } else {
             badge.className = "badge bg-success px-3 py-2";
@@ -222,46 +717,55 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs
             icon.className = "bi bi-person-check-fill fs-4 text-success";
         }
 
-        // 4. 🔀 [핵심] 이력서 및 요구사항 텍스트 기반 동적 질문 추출
+        // 4. 🔀 30+ DB 질문 풀 기반 동적 조합 추출
         const dynamicQuestions = buildDynamicQuestions(position, requirements, cleanResume);
         renderQuestions(dynamicQuestions);
     }
 
-    // 🧩 텍스트 파싱 기반 질문 생성 함수
+    // 🧩 실시간 키워드 추출 & Hash 오프셋 기반 질문 선택 함수
     function buildDynamicQuestions(position, requirements, resume) {
-        // A. 기술/주요 단어 추출
+        // A. 기술 스택 및 키워드 추출
         const words = resume.replace(/[^\w\s가-힣]/g, ' ').split(/\s+/).filter(w => w.length >= 2);
         const techKeywords = Array.from(new Set(words.filter(w => 
             /Python|Java|React|Vue|Spring|FastAPI|SQL|AWS|Docker|Kubernetes|LLM|PyTorch|TensorFlow|HR|세무|회계|마케팅|기획|구매|총무|ERP|Excel|알약|보안|리버스|노무|연봉|근로기준법|채용|결산/i.test(w)
         )));
 
-        // B. 성과/수치 문장 발췌
+        // B. 성과 및 수치 문장 발췌
         const sentences = resume.split(/[.!?\n]+/).filter(s => s.trim().length > 8);
         const metricSentences = sentences.filter(s => /\d+%|\d+개|\d+원|\d+건|개선|증가|감소|달성|구축|개편|담당|수행/i.test(s));
 
-        // C. 동적 주입용 변수 결정
-        const skill1 = techKeywords[0] || `${position} 핵심 실무`;
-        const skill2 = techKeywords[1] || `${position} 메인 도구`;
+        // C. 동적 주입 변수 세팅
+        const skill1 = techKeywords[0] || `${position} 메인 기술`;
+        const skill2 = techKeywords[1] || `${position} 관련 실무`;
         const metricPoint = metricSentences.length > 0 
             ? `"${metricSentences[0].trim().slice(0, 35)}..."` 
             : `"${sentences[0] ? sentences[0].trim().slice(0, 30) : '주요 실무 성과'}"`;
         
-        const reqKeyword = requirements ? requirements.trim().split(',')[0] : "지정된 스펙 조건";
+        const reqKeyword = requirements ? requirements.trim().split(',')[0] : "요구 스펙";
 
-        // D. 이력서 텍스트 해시 계산 (이력서 텍스트가 1글자만 바뀌어도 DB 질문 조합 인덱스가 변경됨)
-        const hash = resume.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+        // D. 이력서 텍스트의 고유 해시(Hash) 계산 (이력서 내용이 바뀌면 인덱스가 무조건 이동함)
+        const hash = Math.abs(resume.split('').reduce((acc, char) => (acc << 5) - acc + char.charCodeAt(0), 0));
 
         const db = QUESTION_DATABASE[position] || QUESTION_DATABASE["DEFAULT"];
 
-        // DB 템플릿에 실시간 파싱 단어 치환 및 인덱스 조합
-        const q1 = db.light[hash % db.light.length].replace("{skill}", skill1);
-        const q2 = db.light[(hash + 1) % db.light.length].replace("{skill}", skill2);
-        
-        const q3 = db.work[hash % db.work.length].replace("{skill}", skill1).replace("{metric}", metricPoint);
-        const q4 = `[면접관 요구조건: ${reqKeyword}] 해당 조건과 관련하여, 작성해주신 [${skill1}] 경험 중 입사 후 가장 빠르게 성과를 낼 수 있는 부분은 무엇인가요?`;
+        // 30+ 풀에서 오프셋을 두어 2개씩 다양하게 추출
+        const lightIdx1 = hash % db.light.length;
+        const lightIdx2 = (hash + 3) % db.light.length;
 
-        const q5 = db.deep[hash % db.deep.length].replace("{skill}", skill1).replace("{metric}", metricPoint);
-        const q6 = db.deep[(hash + 1) % db.deep.length].replace("{skill}", skill2);
+        const workIdx1 = hash % db.work.length;
+        const workIdx2 = (hash + 4) % db.work.length;
+
+        const deepIdx1 = hash % db.deep.length;
+        const deepIdx2 = (hash + 5) % db.deep.length;
+
+        const q1 = db.light[lightIdx1].replace(/\{skill\}/g, skill1).replace(/\{metric\}/g, metricPoint);
+        const q2 = db.light[lightIdx2].replace(/\{skill\}/g, skill2).replace(/\{metric\}/g, metricPoint);
+        
+        const q3 = db.work[workIdx1].replace(/\{skill\}/g, skill1).replace(/\{metric\}/g, metricPoint).replace(/\{req\}/g, reqKeyword);
+        const q4 = db.work[workIdx2].replace(/\{skill\}/g, skill2).replace(/\{metric\}/g, metricPoint).replace(/\{req\}/g, reqKeyword);
+
+        const q5 = db.deep[deepIdx1].replace(/\{skill\}/g, skill1).replace(/\{metric\}/g, metricPoint);
+        const q6 = db.deep[deepIdx2].replace(/\{skill\}/g, skill2).replace(/\{metric\}/g, metricPoint);
 
         return [
             { cat: "가벼운 질문 (Ice Breaking & 기본)", q: q1 },
@@ -298,3 +802,6 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs
         });
         document.getElementById('questionListArea').innerHTML = qHtml;
     }
+</script>
+</body>
+</html>
