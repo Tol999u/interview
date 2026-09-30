@@ -3,746 +3,506 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EST INTERVIEW - AI 면접심사 솔루션</title>
-    <!-- Bootstrap 5 CSS & Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <!-- PDF.js library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <title>AI 이력서 기반 맞춤형 면접 시뮬레이터</title>
     <style>
         :root {
-            --est-blue: #0055FF;
-            --est-dark: #0B0E14;
-            --est-card-bg: #FFFFFF;
-            --est-bg: #F4F7FB;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-gray: #f8fafc;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --accent: #f59e0b;
+            --success: #10b981;
         }
 
-        html, body {
-            height: 100%;
-            background-color: var(--est-bg);
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            color: #2D3748;
         }
 
-        .app-wrapper {
+        body {
+            background-color: var(--bg-gray);
+            color: var(--text-main);
+            padding: 24px;
+            line-height: 1.5;
+        }
+
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            margin-bottom: 24px;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 16px;
+        }
+
+        header h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text-main);
             display: flex;
-            flex-direction: column;
-            min-height: 100vh;
+            align-items: center;
+            gap: 10px;
         }
 
-        .navbar {
-            background-color: var(--est-dark);
-            border-bottom: 3px solid var(--est-blue);
-            padding: 14px 28px;
-        }
-        .navbar-brand {
-            font-weight: 900;
-            font-size: 1.4rem;
-            letter-spacing: -0.5px;
-            color: #FFFFFF !important;
-        }
-        .navbar-brand span {
-            color: var(--est-blue);
+        header p {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin-top: 4px;
         }
 
-        .main-container {
-            flex: 1;
-            padding: 24px 32px;
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 900px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         .card {
-            border: none;
-            border-radius: 14px;
-            box-shadow: 0 4px 20px rgba(0, 85, 255, 0.06);
-            background-color: var(--est-card-bg);
-            height: 100%;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
 
-        .card-header {
-            background-color: #FFFFFF;
-            border-bottom: 1px solid #E2E8F0;
-            padding: 18px 24px;
-            font-weight: 700;
-            font-size: 1.05rem;
-            border-radius: 14px 14px 0 0 !important;
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .btn-est {
-            background-color: var(--est-blue);
-            color: #FFFFFF;
-            font-weight: 700;
-            padding: 12px 24px;
-            border-radius: 10px;
-            border: none;
-            transition: all 0.2s ease-in-out;
-            font-size: 1rem;
-        }
-        .btn-est:hover {
-            background-color: #0044CC;
-            color: #FFFFFF;
-            transform: translateY(-1px);
-        }
-
-        .badge-est {
-            background-color: rgba(0, 85, 255, 0.1);
-            color: var(--est-blue);
-            font-weight: 700;
-            padding: 6px 12px;
-            border-radius: 6px;
-        }
-
-        .question-card {
-            border-left: 4px solid var(--est-blue);
-            background: #FFFFFF;
-            padding: 16px;
-            margin-bottom: 12px;
-            border-radius: 0 10px 10px 0;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-            border-top: 1px solid #F0F4F8;
-            border-right: 1px solid #F0F4F8;
-            border-bottom: 1px solid #F0F4F8;
-        }
-        .q-tag-light { border-left-color: #20C997; }
-        .q-tag-work { border-left-color: var(--est-blue); }
-        .q-tag-deep { border-left-color: #FD7E14; }
-
-        .q-badge-light { background-color: #E6FCF5; color: #0CA678; }
-        .q-badge-work { background-color: #E7F5FF; color: #1971C2; }
-        .q-badge-deep { background-color: #FFF4E6; color: #D9480F; }
-
-        .ai-detector-box {
-            border-radius: 10px;
-            padding: 14px;
-            background-color: #FFF9DB;
-            border: 1px solid #FFE066;
+        .form-group {
             margin-bottom: 16px;
         }
 
-        .file-drop-area {
-            border: 2px dashed #CBD5E1;
-            border-radius: 10px;
-            padding: 14px;
-            text-align: center;
-            background-color: #F8FAFC;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .file-drop-area:hover {
-            background-color: #F1F5F9;
-            border-color: var(--est-blue);
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text-main);
         }
 
-        footer {
-            background-color: var(--est-dark);
-            color: #A0AEC0;
-            padding: 20px 32px;
-            font-size: 0.88rem;
-            border-top: 1px solid #2D3748;
+        select, textarea, input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
         }
-        .footer-logo {
-            font-weight: 900;
-            color: #FFFFFF;
-            font-size: 1.1rem;
+
+        select:focus, textarea:focus, input:focus {
+            border-color: var(--primary);
+        }
+
+        textarea {
+            height: 280px;
+            resize: vertical;
+        }
+
+        .btn {
             display: inline-flex;
             align-items: center;
+            justify-content: center;
+            padding: 10px 20px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
             gap: 6px;
+            margin-bottom: 16px;
         }
-        .footer-logo .t9-badge {
-            background: var(--est-blue);
-            color: #fff;
-            padding: 2px 7px;
-            border-radius: 4px;
+
+        .tag {
+            background-color: #eff6ff;
+            color: var(--primary);
             font-size: 0.8rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 12px;
+            border: 1px solid #bfdbfe;
         }
 
-        .warning-text-box {
-            background-color: #FFF5F5;
-            border: 1px solid #FEB2B2;
-            color: #C53030;
+        .question-item {
+            border: 1px solid var(--border);
             border-radius: 8px;
-            padding: 14px;
-            font-size: 0.92rem;
-            margin-top: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            background-color: #fff;
         }
 
-        .score-metric-badge {
-            font-size: 1.25rem;
-            font-weight: 800;
+        .question-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .q-badge {
+            background-color: var(--primary);
+            color: white;
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+
+        .scoring-box {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px dashed var(--border);
+            display: grid;
+            grid-template-columns: 1fr 120px;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .score-input-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .score-input-group input[type="number"] {
+            width: 70px;
+            text-align: center;
+        }
+
+        .summary-card {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 20px;
+        }
+
+        .score-total {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--success);
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 40px 0;
+            font-size: 0.95rem;
         }
     </style>
 </head>
 <body>
 
-<div class="app-wrapper">
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg">
-        <div class="container-fluid px-2">
-            <a class="navbar-brand" href="#"><i class="bi bi-cpu-fill me-2"></i>EST <span>INTERVIEW</span></a>
-            <span class="text-white-50 small"><i class="bi bi-shield-check me-1"></i>이스트소프트 AI 면접심사 및 정밀 직무 적합도 검증 솔루션</span>
-        </div>
-    </nav>
+<div class="app-container">
+    <header>
+        <h1>🎯 AI 이력서 기반 맞춤형 면접 시뮬레이터</h1>
+        <p>이력서의 키워드 및 성과 패턴을 정밀 분석하여 중복 없는 다각도 면접 질문을 추출하고 1점 단위 스코어링 평가를 진행합니다.</p>
+    </header>
 
-    <!-- Main Container -->
-    <div class="main-container">
-        <div class="row g-4 h-100">
+    <div class="main-grid">
+        <!-- 좌측: 이력서 및 직군 입력 -->
+        <div class="card">
+            <div class="card-title">지원자 정보 입력</div>
             
-            <!-- Left Side Inputs -->
-            <div class="col-xl-5 col-lg-6 d-flex flex-column">
-                <div class="card flex-fill">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <span><i class="bi bi-sliders me-2"></i>심사 조건 및 이력서 입력</span>
-                        <span class="badge badge-est">AI 역량 정량 심사</span>
-                    </div>
-                    <div class="card-body d-flex flex-column justify-content-between">
-                        <form id="interviewForm" class="d-flex flex-column h-100 justify-content-between">
-                            <div>
-                                <!-- Job Position (23 IT Roles) -->
-                                <div class="mb-3">
-                                    <label class="form-label fw-bold"><i class="bi bi-briefcase me-1"></i>지원 직군 선택 (IT 23개 세부 직군)</label>
-                                    <select class="form-select" id="jobPosition" required>
-                                        <optgroup label="🤖 AI & Data Domain">
-                                            <option value="AI / LLM 연구원">AI / LLM 연구원</option>
-                                            <option value="AI / Prompt 엔지니어">AI / Prompt 엔지니어</option>
-                                            <option value="데이터 엔지니어">데이터 엔지니어</option>
-                                            <option value="데이터 사이언티스트 / 분석가">데이터 사이언티스트 / 분석가</option>
-                                        </optgroup>
-                                        <optgroup label="💻 Software & Infra Domain">
-                                            <option value="백엔드 / SW 개발자">백엔드 / SW 개발자</option>
-                                            <option value="프론트엔드 / 웹 개발자">프론트엔드 / 웹 개발자</option>
-                                            <option value="앱 / 클라이언트 개발자">앱 / 클라이언트 개발자 (iOS/Android)</option>
-                                            <option value="DevOps / Cloud SRE">DevOps / Cloud SRE 엔지니어</option>
-                                            <option value="보안 / 리버스 엔지니어">보안 / 리버스 엔지니어 (알약/보안)</option>
-                                            <option value="QA / SW 테스트 엔지니어">QA / SW 테스트 엔지니어</option>
-                                        </optgroup>
-                                        <optgroup label="🎨 Product & Design Domain">
-                                            <option value="AI 서비스 기획 / PM">AI 서비스 기획 / PM</option>
-                                            <option value="테크니컬 PM / PO">테크니컬 PM / PO</option>
-                                            <option value="UI / UX 디자이너">UI / UX 디자이너</option>
-                                            <option value="브랜드 / 그래픽 디자이너">브랜드 / 그래픽 디자이너</option>
-                                        </optgroup>
-                                        <optgroup label="📈 Marketing & Sales Domain">
-                                            <option value="퍼포먼스 마케터">퍼포먼스 마케터</option>
-                                            <option value="콘텐츠 / 브랜딩 마케터">콘텐츠 / 브랜딩 마케터</option>
-                                            <option value="B2B / IT 솔루션 영업">B2B / IT 솔루션 영업</option>
-                                            <option value="사업개발 / BD">사업개발 / BD (Business Development)</option>
-                                        </optgroup>
-                                        <optgroup label="🏢 Corporate & Business Support">
-                                            <option value="인사 (HRM / HRD)">인사 (HRM / HRD)</option>
-                                            <option value="재무 / 회계 / 세무">재무 / 회계 / 세무</option>
-                                            <option value="총무 / 자산관리">총무 / 자산관리</option>
-                                            <option value="구매 / SCM">구매 / SCM (자재관리)</option>
-                                            <option value="경영기획 / 전략">경영기획 / 전략</option>
-                                        </optgroup>
-                                    </select>
-                                </div>
+            <div class="form-group">
+                <label for="jobSelect">지원 직군 선택</label>
+                <select id="jobSelect">
+                    <option value="dev">개발 / 테크 (Frontend, Backend, DevOps)</option>
+                    <option value="pm">기획 / PM / PO</option>
+                    <option value="marketing">마케팅 / 데이터 분석</option>
+                    <option value="biz">영업 / 인사 / 재무 / 경영지원</option>
+                </select>
+            </div>
 
-                                <!-- Target Requirements -->
-                                <div class="mb-3">
-                                    <label class="form-label fw-bold"><i class="bi bi-person-check me-1"></i>면접관 요구 스펙/스킬/인성 조건</label>
-                                    <textarea class="form-select" id="targetRequirements" rows="2" placeholder="예: Python, Fast API 숙련자, Figma 활용능력, B2B 영업 경험, 적극적인 주도성..." style="height: auto; font-size: 0.9rem;"></textarea>
-                                </div>
+            <div class="form-group">
+                <label for="resumeInput">이력서 및 경력기술서 내용</label>
+                <textarea id="resumeInput" placeholder="지원자의 이력서, 프로젝트 경험, 주요 성과 텍스트를 붙여넣으세요...&#10;&#10;예시: React와 TypeScript 기반 서비스 개발. API 렌더링 속도 40% 개선. N+1 쿼리 튜닝 및 AWS 인프라 비용 절감. 팀 내 소통 문제 해결 및 프로젝트 정시 완료."></textarea>
+            </div>
 
-                                <!-- File Upload -->
-                                <div class="mb-3">
-                                    <label class="form-label fw-bold"><i class="bi bi-paperclip me-1"></i>이력서/포트폴리오 파일 첨부 (PDF/TXT)</label>
-                                    <div class="file-drop-area" onclick="document.getElementById('fileInput').click()">
-                                        <i class="bi bi-cloud-arrow-up display-6 text-primary mb-1 d-block"></i>
-                                        <span class="small text-secondary" id="fileNameDisplay">클릭하여 파일 업로드 (PDF, TXT)</span>
-                                        <input type="file" id="fileInput" accept=".pdf, .txt" class="d-none" onchange="handleFileUpload(event)">
-                                    </div>
-                                </div>
+            <button class="btn btn-primary" onclick="generateQuestions()">면접 질문 정밀 추출 실행</button>
+        </div>
 
-                                <!-- Resume Text -->
-                                <div class="mb-3">
-                                    <label class="form-label fw-bold"><i class="bi bi-file-text me-1"></i>이력서 및 포트폴리오 텍스트</label>
-                                    <textarea class="form-select" id="resumeText" rows="6" placeholder="지원자의 이력서, 경력기술서, 프로젝트 설명을 입력하세요..." style="height: auto; font-size: 0.9rem;" required></textarea>
-                                </div>
-                            </div>
+        <!-- 우측: 생성된 질문 및 채점 -->
+        <div class="card">
+            <div class="card-title">
+                <span>정밀 추출 면접 질문</span>
+                <span id="questionCount" style="font-size:0.85rem; color:var(--text-muted); font-weight:normal;"></span>
+            </div>
 
-                            <button type="submit" class="btn btn-est w-100 mt-2" id="analyzeBtn">
-                                <i class="bi bi-magic me-2"></i>이력서 심층 분석 및 직무 적합도 검증
-                            </button>
-                        </form>
-                    </div>
+            <div id="detectedKeywords" class="tags-container"></div>
+
+            <div id="questionsContainer">
+                <div class="empty-state">
+                    왼쪽 양식에 이력서를 입력하고 [면접 질문 정밀 추출 실행] 버튼을 눌러주세요.
                 </div>
             </div>
 
-            <!-- Right Side Results -->
-            <div class="col-xl-7 col-lg-6 d-flex flex-column">
-                
-                <!-- Loading Card -->
-                <div class="card flex-fill d-none" id="loadingCard">
-                    <div class="card-body d-flex flex-column align-items-center justify-content-center py-5">
-                        <div class="spinner-border text-primary mb-3" role="status" style="width: 3.5rem; height: 3.5rem;"></div>
-                        <h5 class="fw-bold">지원자 역량 및 직무 적합도 다면 분석 중...</h5>
-                        <p class="text-muted small">직무 키워드 상대 밀도, 성과 수치화 비율, 어휘 구사력을 다각도로 정밀 파싱하고 있습니다.</p>
+            <div id="summarySection" class="summary-card" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-size:0.85rem; color:#166534; font-weight:600;">총 종합 평가 점수 (1점 단위)</div>
+                        <div class="score-total" id="totalScoreText">0 / 0 점</div>
                     </div>
-                </div>
-
-                <!-- Placeholder Card -->
-                <div class="card flex-fill" id="placeholderCard">
-                    <div class="card-body d-flex flex-column align-items-center justify-content-center text-center py-5 text-muted">
-                        <i class="bi bi-clipboard2-check display-3 mb-3 text-secondary opacity-50"></i>
-                        <h5 class="fw-bold">좌측에 이력 정보를 입력해 주세요.</h5>
-                        <p class="small mb-0">이스트소프트 AI 역량 검증 모델에 기반한 다차원 직무 적합도 리포트가 생성됩니다.</p>
-                    </div>
-                </div>
-
-                <!-- Result Area -->
-                <div id="resultArea" class="d-none flex-fill d-flex flex-column gap-3">
-                    
-                    <!-- AI Detector Box -->
-                    <div class="ai-detector-box d-flex align-items-center justify-content-between" id="aiDetectorAlert">
-                        <div class="d-flex align-items-center gap-2">
-                            <i class="bi bi-robot fs-4" id="aiIcon"></i>
-                            <div>
-                                <strong class="d-block" id="aiDetectTitle">AI 에이전트 활용 및 서류 정밀 분석</strong>
-                                <span class="small text-dark" id="aiDetectDesc">-</span>
-                            </div>
-                        </div>
-                        <span class="badge px-3 py-2" id="aiDetectBadge">-</span>
-                    </div>
-
-                    <!-- Job Match Report -->
-                    <div class="card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <span><i class="bi bi-graph-up-arrow me-2"></i>직무 정밀 심사 리포트</span>
-                            <span class="badge fs-6 px-3 py-2" id="matchScoreBadge">종합 직무 적합도: -</span>
-                        </div>
-                        <div class="card-body">
-                            <div class="row text-center mb-3">
-                                <div class="col-4 border-end">
-                                    <span class="d-block text-muted small mb-1">직무 키워드 밀도</span>
-                                    <span class="score-metric-badge text-primary" id="scoreSpec">-</span>
-                                </div>
-                                <div class="col-4 border-end">
-                                    <span class="d-block text-muted small mb-1">성과 수치화 비율</span>
-                                    <span class="score-metric-badge text-primary" id="scoreSkill">-</span>
-                                </div>
-                                <div class="col-4">
-                                    <span class="d-block text-muted small mb-1">요구조건 부합도</span>
-                                    <span class="score-metric-badge text-primary" id="scoreFit">-</span>
-                                </div>
-                            </div>
-                            <p class="text-secondary small mb-0" id="summaryAnalysisText">-</p>
-                            <div class="warning-text-box d-none" id="warningBox">
-                                <i class="bi bi-exclamation-octagon-fill me-1"></i><strong>지적 및 감점 사유:</strong> <span id="warningMsg"></span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Question List Card -->
-                    <div class="card flex-fill">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <span><i class="bi bi-patch-question me-2"></i>이력서 키워드 정밀 대조 질문 세트 (총 6문항)</span>
-                            <span class="badge bg-secondary">실시간 맞춤 추출</span>
-                        </div>
-                        <div class="card-body" id="questionListArea">
-                            <!-- Questions inserted here -->
-                        </div>
-                    </div>
-
+                    <button class="btn btn-primary" style="width: auto; padding: 6px 14px; font-size: 0.85rem;" onclick="calculateTotal()">점수 갱신</button>
                 </div>
             </div>
-
         </div>
     </div>
-
-    <!-- Footer -->
-    <footer class="d-flex flex-wrap justify-content-between align-items-center">
-        <div class="d-flex align-items-center gap-3">
-            <span class="footer-logo">
-                EST <span class="t9-badge">T9</span>
-            </span>
-            <span>© 2026 ESTsoft Corp. & T9 Group. All rights reserved.</span>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-            <i class="bi bi-envelope-fill text-primary"></i>
-            <span>시스템 및 채용검증 문의: <a href="mailto:dotol9u@gmail.com" class="text-white text-decoration-underline">dotol9u@gmail.com</a></span>
-        </div>
-    </footer>
 </div>
 
 <script>
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+// ==========================================
+// [1] 이력서 키워드 정밀 대조 질문 DB (확장형)
+// ==========================================
+const KEYWORD_QUESTION_DB = {
+  // --- 테크 / 개발 ---
+  "React": [
+    "React 사용 경험 중 상태 관리 라이브러리(Redux, Recoil, Zustand 등)를 선택할 때 어떤 기준과 타협점을 고려하셨나요?",
+    "렌더링 성능 최적화(Virtual DOM, useMemo, useCallback)를 실제 프로젝트에 적용하여 가시적인 성능 개선을 이룬 경험이 있나요?",
+    "컴포넌트 재사용성과 유지보수성 사이에서 딜레마를 겪었던 적이 있다면, 어떻게 아키텍처를 설계하셨나요?",
+    "React의 생명주기(Lifecycle)나 Hook 동작 원리로 인해 예상치 못한 버그를 경험하고 해결했던 사례를 말씀해 주세요."
+  ],
+  "TypeScript": [
+    "TypeScript 도입 시 엄격한 타입 정의(Strict Mode)로 인해 개발 속도가 지연되거나 팀원과 마찰이 발생했을 때 어떻게 조율하셨나요?",
+    "generic이나 complex type 설계를 적용하여 코드 안정성을 크게 올렸던 실제 사례가 있나요?"
+  ],
+  "Vue": [
+    "Vue의 반응성 시스템(Reactivity System) 원리를 바탕으로 대용량 데이터를 처리할 때 발생했던 성능 병목을 해결한 적이 있나요?",
+    "Options API와 Composition API 중 해당 프로젝트에 특정 방식을 채택한 이유와 구조적 이점은 무엇이었나요?"
+  ],
+  "Node.js/Express": [
+    "Node.js의 싱글 스레드 이벤트 루프 특성상 블로킹(Blocking) 이슈가 발생할 수 있는 상황을 어떻게 예방하고 설계하셨나요?",
+    "동시 접속자가 급증했을 때 백엔드 서버의 스케일아웃 및 세션 관리 전략을 어떻게 수립하셨나요?"
+  ],
+  "Java/Spring": [
+    "Spring의 IoC/DI 개념을 실제 아키텍처 구현 시 활용하여 객체 간 결합도를 낮춘 구체적인 사례를 소개해 주세요.",
+    "JPA 사용 시 발생할 수 있는 N+1 문제나 쿼리 최적화를 위해 어떤 조회 전략과 캐싱을 적용하셨나요?",
+    "대규모 트랜잭션 처리 중 데이터 일관성(ACID)과 동시성 제어를 위해 어떤 DB 락(Lock) 및 격리 수준을 활용하셨나요?"
+  ],
+  "DB/SQL/RDBMS": [
+    "이력서에 기재된 DB 쿼리 튜닝 경험과 관련하여, 인덱스(Index) 재설계 및 Execution Plan 분석을 통해 쿼리 속도를 몇 % 개선하셨나요?",
+    "데이터베이스 정규화 과정에서 비정규화(Denormalization)를 과감히 선택했던 이유와 그에 따른 이점/리스크는 무엇이었나요?"
+  ],
+  "AWS/Cloud/DevOps": [
+    "클라우드 인프라(AWS/GCP) 구성을 통해 인프라 비용 절감이나 고가용성(HA)을 확보했던 구체적인 설정 사례가 있나요?",
+    "CI/CD 파이프라인 구축 중 배포 실패(Rollback) 상황이 발생했을 때 서비스 무중단을 위해 어떤 전략을 세우셨나요?"
+  ],
 
-    // 23개 IT 직군 고유 도메인 전문 단어 세트
-    const JOB_KEYWORDS_MAP = {
-        // AI & Data
-        "AI / LLM 연구원": ["ai", "llm", "모델", "python", "파이썬", "pytorch", "tensorflow", "rag", "transformer", "파인튜닝", "gpu", "딥러닝", "논문", "vector", "embed"],
-        "AI / Prompt 엔지니어": ["프롬프트", "prompt", "gpt", "chatgpt", "llm", "생성형 ai", "few-shot", "cot", "파이프라인", "워크플로우", "에이전트", "langchain"],
-        "데이터 엔지니어": ["데이터 엔지니어", "pipeline", "파이프라인", "spark", "hadoop", "kafka", "airflow", "etl", "data warehouse", "sql", "bigquery", "redshift"],
-        "데이터 사이언티스트 / 분석가": ["데이터 분석", "사이언티스트", "통계", "python", "r", "sql", "tableau", "시각화", "A/B 테스트", "가설 검증", "판다스", "pandas"],
-        
-        // Software & Infra
-        "백엔드 / SW 개발자": ["백엔드", "backend", "java", "자바", "python", "spring", "스프링", "api", "db", "서버", "트래픽", "쿼리", "mysql", "redis", "fastapi"],
-        "프론트엔드 / 웹 개발자": ["프론트엔드", "frontend", "react", "vue", "next.js", "typescript", "타입스크립트", "javascript", "css", "html", "웹 개발", "상태 관리"],
-        "앱 / 클라이언트 개발자": ["앱", "클라이언트", "ios", "android", "안드로이드", "swift", "kotlin", "flutter", "react native", "모바일", "스위프트", "코틀린"],
-        "DevOps / Cloud SRE": ["devops", "sre", "aws", "cloud", "쿠버네티스", "kubernetes", "docker", "도커", "CI/CD", "테라폼", "인프라", "가용성", "모니터링"],
-        "보안 / 리버스 엔지니어": ["보안", "백신", "악성코드", "취약점", "c++", "커널", "리버스", "엔진", "알약", "네트워크", "해킹", "yara", "패킷", "리버싱"],
-        "QA / SW 테스트 엔지니어": ["qa", "테스트", "품질", "test", "자동화", "selenium", "cypress", "버그", "TC", "테스트케이스", "검증", "품질보증"],
-        
-        // Product & Design
-        "AI 서비스 기획 / PM": ["ai 서비스", "기획", "pm", "po", "화면설계", "와이어프레임", "요구사항", "prd", "figma", "피그마", "프로젝트 관리", "agile"],
-        "테크니컬 PM / PO": ["tpm", "테크니컬 pm", "po", "기술 기획", "아키텍처", "개발 일정", "스프린트", "지라", "jira", "백로그", "기술 요구사항"],
-        "UI / UX 디자이너": ["ui", "ux", "디자인", "figma", "피그마", "와이어프레임", "프로토타입", "디자인 시스템", "사용성", "인터페이스", "유저 리서치"],
-        "브랜드 / 그래픽 디자이너": ["그래픽", "브랜드", "브랜딩", "포토샵", "일러스트", "photoshop", "비주얼", "bx", "키비주얼", "상세페이지", "모션"],
-        
-        // Marketing & Sales
-        "퍼포먼스 마케터": ["퍼포먼스", "마케팅", "광고", "roas", "cpa", "cpc", "ga4", "mmp", "애널리틱스", "타겟팅", "매체", "검색광고"],
-        "콘텐츠 / 브랜딩 마케터": ["콘텐츠", "브랜딩", "마케팅", "sns", "인스타그램", "유튜브", "블로그", "카피라이팅", "보도자료", "캠페인", "채널"],
-        "B2B / IT 솔루션 영업": ["b2b", "영업", "솔루션 영업", "고객사", "제안서", "파이프라인", "수주", "매출", "계약", "it 영업", "saas"],
-        "사업개발 / BD": ["사업개발", "bd", "제휴", "파트너십", "신사업", "bm", "비즈니스 모델", "시장 조사", "전략 제휴", "수익 모델"],
-        
-        // Corporate Support
-        "인사 (HRM / HRD)": ["인사", "채용", "hr", "hrm", "hrd", "노무", "평가", "교육", "근로기준법", "급여", "조직", "연봉", "노무법", "온보딩", "원천징수"],
-        "재무 / 회계 / 세무": ["회계", "세무", "결산", "전표", "세금", "재무", "감사", "erp", "부가가치세", "원천세", "k-ifrs", "법인세", "자금", "손익"],
-        "총무 / 자산관리": ["총무", "자산", "자산관리", "비품", "시설", "사옥", "임대차", "의전", "행사", "구매계약", "소모품", "배차", "복리후생", "시설관리"],
-        "구매 / SCM": ["구매", "scm", "자재", "발주", "입고", "출고", "재고", "공급사", "납기", "단가", "조달", "견적", "vendor"],
-        "경영기획 / 전략": ["경영기획", "경영지원", "예산", "kpi", "okr", "손익", "사업계획", "경영진 보고", "이사회", "손익분석", "전략"]
-    };
+  // --- 기획 / 마케팅 ---
+  "서비스기획/PM/PO": [
+    "이해관계자(개발자, 디자이너, 경영진) 간의 요구사항이 첨예하게 대립할 때, 우선순위(Priority)를 판단하는 본인만의 기준은 무엇인가요?",
+    "기획한 기능이 오픈 후 기대했던 데이터 지표(conversion/retention)에 미치지 못했을 때, 원인을 분석하고 린(Lean)하게 개선했던 경험이 있나요?",
+    "와이어프레임 및 PRD 작성 시 개발팀의 기술적 제약 사항을 사전에 파악하기 위해 어떤 소통 방식을 취하시나요?"
+  ],
+  "퍼포먼스/디지털마케팅": [
+    "ROAS나 CAC 개선을 위해 기존 매체 집행 비중을 개편한 성공 사례가 있나요?",
+    "A/B 테스트를 설계할 때 가설 수립부터 유의미한 모수 확보 및 데이터 판정까지의 구체적인 가이드라인을 말씀해 주세요."
+  ],
+  "데이터분석/GA4/SQL": [
+    "단순히 수치를 집계하는 것에 그치지 않고, 데이터 분석 결과를 바탕으로 실제 제품 개선이나 비즈니스 액션 아이템으로 이끌어낸 사례가 있나요?",
+    "펀널 분석(Funnel Analysis)을 통해 고객 이탈의 핵심 병목 구간을 발견하고 해결한 경험을 공유해 주세요."
+  ],
 
-    // 📚 23개 IT 직군 기출 질문 DB
-    const QUESTION_DATABASE = {
-        "AI / LLM 연구원": {
-            light: [
-                "최근 읽으신 [{skill}] 관련 논문이나 연구 중 가장 인상 깊었던 핵심 알고리즘 아이디어는 무엇인가요?",
-                "새로운 [{skill}] 오픈소스 모델이나 프레임워크가 출시되었을 때 빠르게 습득하는 본인만의 학습 루틴이 있나요?"
-            ],
-            work: [
-                "작성해주신 서류 중 {metric} 대목과 관련하여, [{skill}] 파인튜닝 시 환각(Hallucination) 현상을 억제한 실무 노하우는 무엇인가요?",
-                "[{skill}] 기반 RAG(검색 증강 생성) 아키텍처 구축 시 Vector DB 선택 기준과 인덱싱 최적화 전략은 무엇이었나요?"
-            ],
-            deep: [
-                "[{skill}] 모델 서빙 중 Latency와 Throughput 사이의 트레이드오프를 해결하기 위해 어떤 엔진을 활용하셨나요?",
-                "포트폴리오 내 작성 내용 중 ChatGPT 등 외부 AI 도구의 구체적 도움 범위와 본인의 유니크한 로직을 구분하여 설명해 주세요."
-            ]
-        },
-        "백엔드 / SW 개발자": {
-            light: [
-                "이력서에 기재해 주신 [{skill}] 기술을 중심으로 백엔드 개발자로서 성장하게 된 계기는 무엇인가요?",
-                "동료 개발자와 코드 리뷰 진행 중 [{skill}] 설계 방식에 의견 충돌이 발생하면 어떻게 조율하시나요?"
-            ],
-            work: [
-                "서류상의 {metric} 성과와 관련하여, [{skill}] 기반의 대용량 트래픽 처리나 DB 인덱스 튜닝 시 직접 수행한 역할은 무엇이었나요?",
-                "RESTful API 설계 시 자원 명명 규칙과 [{skill}] 예외 처리를 공통화하여 생산성을 높인 경험을 말씀해 주세요."
-            ],
-            deep: [
-                "[{skill}] 활용 중 트랜잭션 동시성 문제로 장애가 발생했던 경험과 이를 해결한 구체적 로직을 설명해 주세요.",
-                "제출하신 결과물 중 Copilot/ChatGPT 등 AI 도구를 사용한 범위와 본인이 직접 코어 로직을 설계한 부분을 구별하여 설명해 주세요."
-            ]
-        },
-        "인사 (HRM / HRD)": {
-            light: [
-                "인사 담당자로서 [{skill}] 관련 업무 수행 시 구성원들과의 신뢰 형성 및 비밀보장을 위해 가장 중요하게 여기는 태도는 무엇인가요?",
-                "최근 채용 시장 트렌드 및 취업 커뮤니티(독취사, 블라인드 등) 내 회사 평판 관리에 대한 본인만의 견해가 있으신가요?"
-            ],
-            work: [
-                "서류 내용 중 {metric} 내용과 관련하여, [{skill}] 규정/제도 개정이나 노무 이슈 대응 시 직접 기여한 바는 무엇인가요?",
-                "직무 평가 및 연봉 협상/평가 운영 과정에서 불만을 가진 피평가자를 설득하고 수용도를 높인 실제 사례가 있나요?"
-            ],
-            deep: [
-                "[{skill}] 관련 법적 노무 분쟁이나 부당해고 진정 등 무거운 인사 이슈가 발생했을 때 연착륙시킨 경험을 구체적으로 설명해 주세요.",
-                "제출하신 기획서/포트폴리오 작성 시 AI 생성 도구를 활용한 부분과 지원자 본인의 인사적 인사이트가 들어간 핵심 영역은 어디인가요?"
-            ]
-        },
-        "총무 / 자산관리": {
-            light: [
-                "이력서에 기재해 주신 [{skill}] 관리 경력을 바탕으로, 총무 직무를 선택하고 성장해 오신 계기는 무엇인가요?",
-                "사내 임직원들의 다양한 요청사항이나 시설 불만을 접수했을 때 신속하고 친절하게 해결하는 본인만의 노하우가 있나요?"
-            ],
-            work: [
-                "작성해 주신 서류의 {metric} 내용과 관련하여, [{skill}] 운영 및 사옥/시설 관리 과정에서 비용을 절감한 구체적 사례는 무엇인가요?",
-                "외주 업체(임대차, 소모품, 행사 등)와의 계약 진행 시 조건 및 단가 협상을 유연하게 이끌어낸 실무 경험을 설명해 주세요."
-            ],
-            deep: [
-                "사옥 이사, 대규모 사내 행사, 또는 복리후생 제도 개편 등 돌발 비상 상황이 생겼을 때 이를 원활히 수습했던 프로세스를 말씀해 주세요.",
-                "회사 자산(비품, 차량, 장비 등)의 누실이나 오남용을 방지하기 위해 단행했던 관리 시스템 개선 경험이 있으신가요?"
-            ]
-        },
-        "DEFAULT": {
-            light: [
-                "이력서에 기재해 주신 [{skill}] 관련 핵심 경험을 바탕으로 해당 직무에 지원하게 된 계기는 무엇인가요?",
-                "팀원들과 협업할 때 [{skill}] 역량을 활용하여 주로 담당하는 역할은 무엇인가요?"
-            ],
-            work: [
-                "서류의 {metric} 성과 달성 과정에서 지원자 본인의 직접적인 기여도(%)와 주요 역할은 무엇이었나요?",
-                "[{skill}] 활용 업무 진행 중 목표치 대비 성과가 미진했을 때 원인을 분석하고 개선안을 제시하여 반전시킨 사례가 있나요?"
-            ],
-            deep: [
-                "[{skill}] 관련 예기치 못한 비상 상황이나 실수가 발생했을 때 이를 솔직하게 보고하고 수습했던 구체적 프로세스를 설명해 주세요.",
-                "제출하신 서류 작성 시 ChatGPT 등 AI 자동화 도구의 도움을 받은 비중과 본인만의 아이디어가 반영된 영역을 구별하여 설명해 주세요."
-            ]
-        }
-    };
+  // --- 경영지원 / 영업 / HR ---
+  "영업/B2B/고객관리": [
+    "거절 가능성이 높은 완강한 고객사나 리드를 상대로 수주(계약)를 끌어내기 위해 사용했던 핵심 설득 전략은 무엇이었나요?",
+    "기존 거래처와의 계약 연장 및 추가 매출(Upselling)을 이끌어내기 위해 어떤 관계 관리(CRM) 활동을 펼치셨나요?"
+  ],
+  "인사/채용/HR": [
+    "핵심 인재 이탈 방지(Retention)나 사내 조직 문화 개선을 위해 직접 제안하여 도입해 본 제도와 그 반응은 어떠했나요?"
+  ],
+  "재무/회계/경영관리": [
+    "예산 수립 대비 실적 오차(Variance)가 크게 발생했을 때, 이를 분석하고 손익 구조를 개선하기 위해 사업부서에 요청했던 조치는 무엇인가요?"
+  ],
 
-    // File Upload Handler
-    async function handleFileUpload(event) {
-        const file = event.target.files[0];
-        if (!file) return;
+  // --- 공통 성과/역량 패턴 ---
+  "성과/지표개선": [
+    "이력서에 언급된 성과(매출/지표 상승)에서 본인이 직접적으로 기여한 비중과, 외부 요인(시장 상황, 시즌성)의 영향을 구분해서 설명해 주실 수 있나요?",
+    "해당 성과를 거두기 위해 시도했던 여러 아이디어 중 실패하거나 통하지 않았던 수단은 무엇이었으며, 이를 어떻게 수정하셨나요?"
+  ],
+  "트러블슈팅/문제해결": [
+    "프로젝트 진행 중 예기치 못한 비상 상황(서버 다운, 릴리즈 지연, 부품 품귀 등)이 발생했을 때 첫 30분 동안 어떻게 행동하셨나요?",
+    "원인이 명확히 밝혀지지 않은 복잡한 결함에 대해 가설 검증 단계별로 접근하여 해결했던 경험을 설명해 주세요."
+  ],
+  "협업/갈등관리": [
+    "팀 내에서 업무 방식이나 기술적 주장이 달라 타협점을 찾기 어려웠던 동료가 있었나요? 어떻게 상대방을 설득하거나 수용하셨나요?",
+    "타 부서와의 업무 협조 요청 시 리소스 부족을 이유로 협조가 거부되었을 때 이를 풀어나간 노하우가 있나요?"
+  ],
+  "프로젝트관리/리더십": [
+    "프로젝트 일정(Deadline)이 임박한 상황에서 과업 범위(Scope)를 축소해야 했을 때, 품질과 납기 사이에서 어떤 의사결정을 하셨나요?"
+  ]
+};
 
-        document.getElementById('fileNameDisplay').innerText = `첨부됨: ${file.name}`;
-
-        if (file.type === "text/plain") {
-            const text = await file.text();
-            document.getElementById('resumeText').value = text;
-        } else if (file.type === "application/pdf") {
-            try {
-                const arrayBuffer = await file.arrayBuffer();
-                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-                let fullText = '';
-                
-                for (let i = 1; i <= pdf.numPages; i++) {
-                    const page = await pdf.getPage(i);
-                    const textContent = await page.getTextContent();
-                    const pageText = textContent.items.map(item => item.str).join(' ');
-                    fullText += pageText + '\n';
-                }
-                document.getElementById('resumeText').value = fullText;
-            } catch (error) {
-                alert('PDF 텍스트 추출 중 오류가 발생했습니다.');
-            }
-        }
+// ==========================================
+// [2] 질문 추출 및 중복 방지 로직
+// ==========================================
+function generateQuestions() {
+    const resumeText = document.getElementById('resumeInput').value.trim();
+    if (!resumeText) {
+        alert('이력서 내용을 입력해 주세요.');
+        return;
     }
 
-    // Form Submit
-    document.getElementById('interviewForm').addEventListener('submit', function(e) {
-        e.preventDefault();
+    const textLower = resumeText.toLowerCase();
+    let detectedKeywords = [];
+    let selectedQuestions = [];
 
-        const position = document.getElementById('jobPosition').value;
-        const requirements = document.getElementById('targetRequirements').value;
-        const resume = document.getElementById('resumeText').value;
+    // 1. 키워드 대조 및 무작위 무작위 셔플 추출
+    Object.keys(KEYWORD_QUESTION_DB).forEach(key => {
+        const subKeys = key.toLowerCase().split('/');
+        const isMatched = subKeys.some(sub => textLower.includes(sub));
 
-        document.getElementById('placeholderCard').classList.add('d-none');
-        document.getElementById('resultArea').classList.add('d-none');
-        document.getElementById('loadingCard').classList.remove('d-none');
-
-        setTimeout(() => {
-            document.getElementById('loadingCard').classList.add('d-none');
-            document.getElementById('resultArea').classList.remove('d-none');
-
-            validateAndAnalyze(position, requirements, resume);
-        }, 1100);
+        if (isMatched) {
+            detectedKeywords.push(key);
+            const pool = [...KEYWORD_QUESTION_DB[key]];
+            // 배열 무작위 섞기 (지원자 간 뺑뺑이 방지)
+            pool.sort(() => 0.5 - Math.random());
+            
+            // 키워드당 최대 2개 무작위 선택
+            selectedQuestions.push({
+                category: key,
+                question: pool[0]
+            });
+            if (pool.length > 1 && Math.random() > 0.4) {
+                selectedQuestions.push({
+                    category: key,
+                    question: pool[1]
+                });
+            }
+        }
     });
 
-    // 🧮 조건부 직무 검증 채점 엔진 (Conditional Role Matching Engine)
-    function validateAndAnalyze(position, requirements, resume) {
-        const cleanResume = resume.trim();
-        const lowerResume = cleanResume.toLowerCase();
-        const warningBox = document.getElementById('warningBox');
-        const warningMsg = document.getElementById('warningMsg');
-
-        let warningReasons = [];
-
-        // --- A. 기초 작성 상태 검사 ---
-        let basicSanityPenalty = 0;
-        if (cleanResume.length < 80) {
-            basicSanityPenalty += 40;
-            warningReasons.push("이력서 분량이 현저히 부족합니다 (80자 미만 제출).");
+    // 2. 수치/숫자 감지 시 성과 패턴 자동 추가
+    if (/[0-9]+%|[0-9]+억|[0-9]+만|[0-9]+건/.test(resumeText)) {
+        if (!detectedKeywords.includes("성과/지표개선")) {
+            detectedKeywords.push("수치기반성과");
+            const pool = KEYWORD_QUESTION_DB["성과/지표개선"];
+            selectedQuestions.push({
+                category: "성과/지표개선",
+                question: pool[Math.floor(Math.random() * pool.length)]
+            });
         }
-
-        if (/(.)\1{4,}/.test(cleanResume) || /asdf|test|ㅋㅋㅋ|ㅎㅎㅎ|개소리|아무거나|입력하기싫음|테스트|지껄/i.test(cleanResume)) {
-            basicSanityPenalty += 40;
-            warningReasons.push("장난성 문자 반복 및 불성실 표현이 포착되었습니다.");
-        }
-
-        // --- B. 23개 직군 교차 도메인 밀도 파싱 ---
-        const selectedJobKeys = JOB_KEYWORDS_MAP[position] || ["경험", "업무", "역량"];
-        const matchedKeys = selectedJobKeys.filter(k => lowerResume.includes(k));
-        const selectedMatchCount = matchedKeys.length;
-
-        let highestMatchJob = position;
-        let highestMatchCount = selectedMatchCount;
-
-        for (const [jobName, keys] of Object.entries(JOB_KEYWORDS_MAP)) {
-            const matchCount = keys.filter(k => lowerResume.includes(k)).length;
-            if (matchCount > highestMatchCount) {
-                highestMatchCount = matchCount;
-                highestMatchJob = jobName;
-            }
-        }
-
-        // --- C. 조건부 가감 없는 감점 vs 미미한 감점 로직 ---
-        let mismatchPenalty = 0;
-        
-        // 지원 직군 기본 요건 충족 여부 (키워드 3개 이상 포착 시 기본 충족으로 인정)
-        const isTargetRoleFulfilled = selectedMatchCount >= 3;
-
-        if (highestMatchJob !== position && highestMatchCount > selectedMatchCount) {
-            if (isTargetRoleFulfilled) {
-                // [조건 1] 지원 직군 내용이 충분히 충족된 경우 -> 타 직군 언급이 있어도 감점 미미 (0~4점)
-                const diff = highestMatchCount - selectedMatchCount;
-                mismatchPenalty = Math.min(4, diff * 1); 
-            } else {
-                // [조건 2] 지원 직군 기본 충족 미흡 + 타 직군이 주 경력인 경우 -> 가감 없이 정밀 엄격 감점 (35~50점)
-                const diff = highestMatchCount - selectedMatchCount;
-                mismatchPenalty = Math.min(50, 35 + diff * 4); 
-                warningReasons.push(`[주 경력 미부합 감점] 지원 직군 [${position}]의 핵심 역량 충족(${selectedMatchCount}개 감지)이 미흡한 반면, 이력서의 주 경력 도메인은 [${highestMatchJob}](${highestMatchCount}개 감지)에 집중되어 있습니다. 경력 미부합으로 인한 정밀 감점(-${mismatchPenalty}점)이 부과되었습니다.`);
-            }
-        } else if (selectedMatchCount < 2) {
-            mismatchPenalty = 25;
-            warningReasons.push(`[${position}] 지원 직무의 핵심 전문 키워드가 서류에서 충분히 발견되지 않았습니다 (${selectedMatchCount}개 감지).`);
-        }
-
-        // --- D. 절대 누적 + 포화 채점 체계 ---
-        const domainScore = Math.min(35, Math.round(selectedMatchCount * 5.5));
-        
-        const sentences = cleanResume.split(/[.!?\n]+/).filter(s => s.trim().length > 6);
-        const lengthScore = Math.min(20, Math.round(Math.log10(cleanResume.length + 1) * 6.5));
-
-        const metricSentences = sentences.filter(s => /\d+%|\d+개|\d+원|\d+건|개선|증가|감소|달성|구축|개편|담당|수행/i.test(s));
-        const metricScore = Math.min(25, Math.round(metricSentences.length * 4.5));
-
-        let reqScore = 14;
-        if (requirements.trim().length > 0) {
-            const reqWords = requirements.replace(/[^\w\s가-힣]/g, ' ').split(/\s+/).filter(w => w.length >= 2);
-            const reqMatched = reqWords.filter(rw => lowerResume.includes(rw.toLowerCase()));
-            reqScore = Math.min(20, Math.round((reqMatched.length / Math.max(1, reqWords.length)) * 16 + 4));
-        }
-
-        // --- E. 최종 점수 합산 ---
-        let rawTotal = domainScore + lengthScore + metricScore + reqScore;
-        let totalPenalty = basicSanityPenalty + mismatchPenalty;
-        let finalScore = Math.max(10, Math.min(98, rawTotal - totalPenalty));
-
-        const metricRatioVal = sentences.length > 0 ? (metricSentences.length / sentences.length) : 0;
-        const matchRatioVal = highestMatchCount > 0 ? (selectedMatchCount / highestMatchCount) : 0;
-
-        // --- F. UI 매핑 및 리포트 문구 출력 ---
-        const matchScoreBadge = document.getElementById('matchScoreBadge');
-        const specEl = document.getElementById('scoreSpec');
-        const skillEl = document.getElementById('scoreSkill');
-        const fitEl = document.getElementById('scoreFit');
-        const summaryEl = document.getElementById('summaryAnalysisText');
-
-        specEl.innerText = `${Math.min(100, Math.round((selectedMatchCount / 6) * 100))}%`;
-        skillEl.innerText = `${Math.round(metricRatioVal * 100)}%`;
-        fitEl.innerText = `${Math.round(matchRatioVal * 100)}%`;
-
-        if (totalPenalty >= 35 || finalScore < 60) {
-            matchScoreBadge.className = "badge bg-danger fs-6 px-3 py-2";
-            matchScoreBadge.innerText = `종합 적합도: ${finalScore}% (부적합 / F등급)`;
-
-            summaryEl.innerText = `[서류 정밀 검증 결과] 제출된 서류는 [${position}] 직무 적합도 기준치에 미달합니다. 지원 직군 핵심 역량 부족 및 주 경력 도메인([${highestMatchJob}]) 미부합이 평가에 차감 반영되었습니다.`;
-            warningBox.classList.remove('d-none');
-            warningMsg.innerText = warningReasons.join(' / ');
-        } else if (totalPenalty >= 18 || finalScore < 78) {
-            matchScoreBadge.className = "badge bg-warning text-dark fs-6 px-3 py-2";
-            matchScoreBadge.innerText = `종합 적합도: ${finalScore}% (보완 필요 / C등급)`;
-
-            summaryEl.innerText = `[직무 연관성 검증 리포트] 지원 직군 [${position}]에 대한 주요 역량은 확인되나, 타 도메인([${highestMatchJob}]) 요소가 혼재되어 세부 면접 검증이 권장됩니다.`;
-            warningBox.classList.remove('d-none');
-            warningMsg.innerText = warningReasons.join(' / ');
-        } else {
-            matchScoreBadge.className = "badge bg-success fs-6 px-3 py-2";
-            matchScoreBadge.innerText = `종합 적합도: ${finalScore}% (우수 / A등급)`;
-
-            const reqText = requirements ? requirements.trim() : "기본 직무 요건";
-            
-            if (highestMatchJob !== position && isTargetRoleFulfilled) {
-                summaryEl.innerText = `[서류 심사 우수 리포트] 이력서에 타 직군([${highestMatchJob}]) 관련 경험이 함께 포함되어 있으나, 지원 직무 [${position}]의 필수 전문 역량(${matchedKeys.join(', ')})이 충분히 입증되어 감점을 최소화하고 우수 평가를 부여했습니다.`;
-            } else {
-                summaryEl.innerText = `[서류 심사 우수 리포트] 지원자의 이력서는 [${position}] 직무 전문 키워드(${matchedKeys.join(', ')}) 및 성과 수치화 비율이 우수하며, 면접관 요구조건("${reqText}")을 충실히 충족합니다.`;
-            }
-            warningBox.classList.add('d-none');
-        }
-
-        // --- G. AI 작성 여부 판별 ---
-        const badge = document.getElementById('aiDetectBadge');
-        const title = document.getElementById('aiDetectTitle');
-        const desc = document.getElementById('aiDetectDesc');
-        const icon = document.getElementById('aiIcon');
-
-        if (cleanResume.length > 1800 && totalPenalty < 35) {
-            badge.className = "badge bg-danger px-3 py-2";
-            badge.innerText = "AI 작성 감지 (78%)";
-            title.innerText = "AI 에이전트 활용 작성 가능성 감지";
-            desc.innerText = "정형화된 대량 서술 패턴이 포착되었습니다. 실제 본인 수행 여부를 심층 검증하세요.";
-            icon.className = "bi bi-robot fs-4 text-warning";
-        } else if (totalPenalty >= 35) {
-            badge.className = "badge bg-secondary px-3 py-2";
-            badge.innerText = "검증 불가";
-            title.innerText = "부적격 서류 제출됨";
-            desc.innerText = "직무 불일치 또는 불성실 서류 제출로 AI 감지 분석 대상이 아닙니다.";
-            icon.className = "bi bi-exclamation-triangle-fill fs-4 text-danger";
-        } else {
-            badge.className = "badge bg-success px-3 py-2";
-            badge.innerText = "자연스러움 (15%)";
-            title.innerText = "지원자 직접 작성 서류";
-            desc.innerText = "실무 경험 중심의 자연스러운 문맥이 확인되었습니다.";
-            icon.className = "bi bi-person-check-fill fs-4 text-success";
-        }
-
-        // --- H. 질문 추출 ---
-        const dynamicQuestions = buildDynamicQuestions(position, requirements, cleanResume);
-        renderQuestions(dynamicQuestions);
     }
 
-    // 🧩 23개 IT 직군 동적 질문 생성기
-    function buildDynamicQuestions(position, requirements, resume) {
-        const words = resume.replace(/[^\w\s가-힣]/g, ' ').split(/\s+/).filter(w => w.length >= 2);
-        const techKeywords = Array.from(new Set(words.filter(w => 
-            /Python|Java|React|Vue|Spring|FastAPI|SQL|AWS|Docker|Kubernetes|LLM|PyTorch|TensorFlow|HR|세무|회계|마케팅|기획|구매|총무|ERP|Excel|알약|보안|리버스|노무|연봉|근로기준법|채용|결산|자산|시설|비품|피그마|Figma|GA4|MMP|QA|테스트/i.test(w)
-        )));
-
-        const sentences = resume.split(/[.!?\n]+/).filter(s => s.trim().length > 8);
-        const metricSentences = sentences.filter(s => /\d+%|\d+개|\d+원|\d+건|개선|증가|감소|달성|구축|개편|담당|수행/i.test(s));
-
-        const skill1 = techKeywords[0] || `${position} 메인 실무`;
-        const skill2 = techKeywords[1] || `${position} 연관 역량`;
-        const metricPoint = metricSentences.length > 0 
-            ? `"${metricSentences[0].trim().slice(0, 35)}..."` 
-            : `"${sentences[0] ? sentences[0].trim().slice(0, 30) : '주요 실무 성과'}"`;
-        
-        const reqKeyword = requirements ? requirements.trim().split(',')[0] : "요구 스펙";
-        const hash = Math.abs(resume.split('').reduce((acc, char) => (acc << 5) - acc + char.charCodeAt(0), 0));
-
-        const db = QUESTION_DATABASE[position] || QUESTION_DATABASE["DEFAULT"];
-
-        const q1 = db.light[hash % db.light.length].replace(/\{skill\}/g, skill1).replace(/\{metric\}/g, metricPoint);
-        const q2 = db.light[(hash + 1) % db.light.length].replace(/\{skill\}/g, skill2).replace(/\{metric\}/g, metricPoint);
-        
-        const q3 = db.work[hash % db.work.length].replace(/\{skill\}/g, skill1).replace(/\{metric\}/g, metricPoint).replace(/\{req\}/g, reqKeyword);
-        const q4 = db.work[(hash + 1) % db.work.length].replace(/\{skill\}/g, skill2).replace(/\{metric\}/g, metricPoint).replace(/\{req\}/g, reqKeyword);
-
-        const q5 = db.deep[hash % db.deep.length].replace(/\{skill\}/g, skill1).replace(/\{metric\}/g, metricPoint);
-        const q6 = db.deep[(hash + 1) % db.deep.length].replace(/\{skill\}/g, skill2).replace(/\{metric\}/g, metricPoint);
-
-        return [
-            { cat: "가벼운 질문 (Ice Breaking & 기본)", q: q1 },
-            { cat: "가벼운 질문 (Ice Breaking & 기본)", q: q2 },
-            { cat: "업무 관련 질문 (Practical Work)", q: q3 },
-            { cat: "업무 관련 질문 (Practical Work)", q: q4 },
-            { cat: "심층 질문 (Technical & Deep Dive)", q: q5 },
-            { cat: "심층 질문 (Technical & Deep Dive)", q: q6 }
-        ];
-    }
-
-    // Render Questions
-    function renderQuestions(questions) {
-        let qHtml = '';
-        const styles = [
-            { style: "q-tag-light", badgeStyle: "q-badge-light" },
-            { style: "q-tag-light", badgeStyle: "q-badge-light" },
-            { style: "q-tag-work", badgeStyle: "q-badge-work" },
-            { style: "q-tag-work", badgeStyle: "q-badge-work" },
-            { style: "q-tag-deep", badgeStyle: "q-badge-deep" },
-            { style: "q-tag-deep", badgeStyle: "q-badge-deep" }
-        ];
-
-        questions.forEach((item, idx) => {
-            const st = styles[idx] || styles[0];
-            qHtml += `
-                <div class="question-card ${st.style}">
-                    <div class="d-flex justify-content-between align-items-center mb-1">
-                        <span class="badge ${st.badgeStyle}">문항 ${idx + 1} · ${item.cat}</span>
-                    </div>
-                    <p class="mb-0 fw-semibold text-dark">${item.q}</p>
-                </div>
-            `;
+    // 3. 질문이 적을 경우 공통 트러블슈팅/협업 보충
+    if (selectedQuestions.length < 5) {
+        const fallbackKeys = ["트러블슈팅/문제해결", "협업/갈등관리", "프로젝트관리/리더십"];
+        fallbackKeys.forEach(fbKey => {
+            const pool = KEYWORD_QUESTION_DB[fbKey];
+            const q = pool[Math.floor(Math.random() * pool.length)];
+            if (!selectedQuestions.some(item => item.question === q)) {
+                selectedQuestions.push({ category: fbKey, question: q });
+            }
         });
-        document.getElementById('questionListArea').innerHTML = qHtml;
     }
+
+    // 4. 최종 질문 무작위 셔플 후 5~7개 선별
+    selectedQuestions.sort(() => 0.5 - Math.random());
+    const finalQuestions = selectedQuestions.slice(0, 6);
+
+    // Render UI
+    renderKeywords(detectedKeywords);
+    renderQuestions(finalQuestions);
+}
+
+// ==========================================
+// [3] UI 렌더링 및 1점 단위 채점 로직
+// ==========================================
+function renderKeywords(keywords) {
+    const container = document.getElementById('detectedKeywords');
+    if (keywords.length === 0) {
+        container.innerHTML = '<span class="tag" style="background:#f1f5f9; color:#475569;">#공통_역량_추출</span>';
+        return;
+    }
+    container.innerHTML = keywords.map(k => `<span class="tag">#${k}</span>`).join('');
+}
+
+function renderQuestions(questions) {
+    const container = document.getElementById('questionsContainer');
+    const countText = document.getElementById('questionCount');
+    const summarySection = document.getElementById('summarySection');
+
+    countText.innerText = `총 ${questions.length}개 질문 생성됨`;
+
+    let html = '';
+    questions.forEach((qObj, index) => {
+        html += `
+            <div class="question-item" id="qItem_${index}">
+                <div class="question-header">
+                    <span class="q-badge">질문 ${index + 1}</span>
+                    <span style="font-size:0.8rem; color:var(--primary); font-weight:bold;">[${qObj.category}]</span>
+                </div>
+                <div style="font-size:0.95rem; font-weight:600; margin-bottom:10px; color:#1e293b;">
+                    ${qObj.question}
+                </div>
+                <textarea placeholder="면접자의 답변 요약 또는 평가 메모 입력..." style="height:70px; font-size:0.85rem; margin-bottom:8px;"></textarea>
+                
+                <div class="scoring-box">
+                    <span style="font-size:0.85rem; color:var(--text-muted);">답변 평가 (1점 단위)</span>
+                    <div class="score-input-group">
+                        <input type="number" class="score-input" min="0" max="10" value="0" step="1" onchange="calculateTotal()">
+                        <span style="font-size:0.85rem; font-weight:bold;">/ 10점</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+    summarySection.style.display = 'block';
+    calculateTotal();
+}
+
+function calculateTotal() {
+    const inputs = document.querySelectorAll('.score-input');
+    let total = 0;
+    let max = inputs.length * 10;
+
+    inputs.forEach(input => {
+        let val = parseInt(input.value) || 0;
+        if (val > 10) val = 10;
+        if (val < 0) val = 0;
+        input.value = val;
+        total += val;
+    });
+
+    document.getElementById('totalScoreText').innerText = `${total} / ${max} 점`;
+}
 </script>
+
 </body>
 </html>
